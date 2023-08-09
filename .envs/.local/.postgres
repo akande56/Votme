@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=voteme
+POSTGRES_USER=konMEmQnvJciMdoPSDuOKtKGccQWnEXe
+POSTGRES_PASSWORD=daSV8y4ZZ7ViM0GYwxwEaNiqjE1o7iLaKp9PpfQHIjSM9lkJd0aegBIdzigeaTld

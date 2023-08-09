@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+
+
+  {{ user.name }}
+
+
+{% endblock title %}
+{% block content %}
+<div class="content">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card card-plain">
+        <div class="container mt-5 offset-md-3">
+          <div class="col-md-6">
+            <h1>
+          
+          
+              {{ user.name }}
+            
+            
+          </h1>
+          <form class="form-horizontal"
+                method="post"
+                action="{% url 'users:update' %}">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="control-group">
+              <div class="controls">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

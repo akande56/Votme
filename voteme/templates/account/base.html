@@ -1,0 +1,19 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %}
+
+{% endblock title %}
+
+{% block content %}  
+  <div class="content">
+    <div class="container">
+      <div class="row pt-5">
+        <div class="col-md-6 mt-5 offset-md-3 pt-5 mt-5">
+          {% block inner %}
+            
+          {% endblock inner %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
