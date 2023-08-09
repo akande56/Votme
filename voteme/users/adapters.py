@@ -11,11 +11,9 @@ if typing.TYPE_CHECKING:
     from allauth.socialaccount.models import SocialLogin
     from voteme.users.models import User
 
-
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request: HttpRequest) -> bool:
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
-
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request: HttpRequest, sociallogin: SocialLogin) -> bool:
@@ -28,10 +26,14 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         See: https://django-allauth.readthedocs.io/en/latest/advanced.html?#creating-and-populating-user-instances
         """
         user = sociallogin.user
-        if name := data.get("name"):
+        name = data.get("name")
+        if name:
             user.name = name
-        elif first_name := data.get("first_name"):
-            user.name = first_name
-            if last_name := data.get("last_name"):
-                user.name += f" {last_name}"
+        else:
+            first_name = data.get("first_name")
+            if first_name:
+                user.name = first_name
+                last_name = data.get("last_name")
+                if last_name:
+                    user.name += f" {last_name}"
         return super().populate_user(request, sociallogin, data)
