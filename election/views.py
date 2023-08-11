@@ -2,8 +2,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 from .models import Organization,UserOrganization,Unit_department
-from .forms import OrganizationForm,Unit_departmentForm
+from .forms import (
+    OrganizationForm,
+    Unit_departmentForm, 
+    ElectionFormStage1,
+    
+)
 
 # Organization
 @login_required  # Requires the user to be logged in to access this view
@@ -21,6 +27,7 @@ def organization_list(request):
     user_organizations = UserOrganization.objects.filter(member=request.user)
     # Get the list of organizations from the filtered UserOrganization instances
     organizations = [user_org.organization for user_org in user_organizations]
+  
 
     return render(request, 'election/organization_list.html', {'organizations': organizations, 'form': form})
 
@@ -31,12 +38,15 @@ def create_organization(request):
         form = OrganizationForm(request.POST)
         if form.is_valid():
             organization = form.save()
+    
             # Get the current logged-in user
             current_user = request.user
 
             # Create a UserOrganization instance for the current user and the newly created organization
             user_organization = UserOrganization.objects.create(member=current_user, organization=organization)
             user_organization.save()
+            # create default unit
+            Unit_department.objects.create(title='all',organization=organization)
             return redirect('organization_list')  # Redirect to the list view after successful creation
     else:
         form = OrganizationForm()
@@ -107,9 +117,7 @@ def unit_list(request):
 
     user_organizations = Organization.objects.filter(userorganization__member=request.user)
     units = Unit_department.objects.filter(organization__in=user_organizations)
-    print('ss')
-    print(form)
-    print(request)
+    
     return render(request, 'election/unit.html', {'units': units, 'form': form})
 
 
@@ -127,10 +135,12 @@ def create_unit(request):
         if organization in Organization.objects.filter(userorganization__member=request.user):
             unit.organization = organization
             unit.save()
+        
     else:
         form = Unit_departmentForm()
-
-    return render(request, 'election/unit.html', {'form': form})
+    user_organizations = Organization.objects.filter(userorganization__member=request.user)
+    units = Unit_department.objects.filter(organization__in=user_organizations)
+    return render(request, 'election/unit.html', {'form': form, 'units':units})
 
 
 
@@ -154,3 +164,23 @@ def delete_unit(request, unit_id):
         return redirect('unit')  # Redirect to the list view after successful deletion
 
     return render(request, 'election/unit.html', {'unit': unit})
+
+
+
+# Election
+def create_election(request):
+    organizations = Organization.objects.all()
+    departments = Unit_department.objects.all()
+
+    if request.method == 'POST':
+        form = ElectionFormStage1(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = ElectionFormStage1()  # Initial form for stage 1
+    form = ElectionFormStage1()
+    return render(request, 'create_election.html', {'form': form,
+            'organizations': organizations,
+            'departments': departments,
+            }
+    )

@@ -37,12 +37,12 @@ class Unit_department(models.Model):
     def __str__(self):
         """Unicode representation of Unit_department."""
         return str(self.title)
-    def save(self, *args, **kwargs):
-        if not self.id:
-            # If the instance is being created (not yet saved to the database)
-            # Set the default title as "all"
-            self.title = "all"
-        super(Unit_department, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.id:
+    #         # If the instance is being created (not yet saved to the database)
+    #         # Set the default title as "all"
+    #         self.title = "all"
+    #     super(Unit_department, self).save(*args, **kwargs)
 
 
 class UserOrganization(models.Model):

@@ -1,103 +1,114 @@
-{% extends "layouts/base.html" %}
+{% extends "layoutss/base.html" %}
 {% load crispy_forms_tags %}
 
 {% block content %}
-<main class="main-content">
-    <h1>Unit</h1>
-    <br>
-    <!-- Dropdown button for create -->
-    <div class="dropdown">
-        <button class="btn bg-gradient-dark mb-0 dropdown-toggle" type="button" id="createNewUnitDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Create New Unit
-        </button>
-        <div class="dropdown-menu" aria-labelledby="createNewUnitDropdown">
-            <form class="px-4 py-3" action="{% url 'create_unit' %}" method="post">
-                {% csrf_token %}
-                {{ form|crispy }}
-                <button type="submit" class="btn btn-primary">Save</button>
-            </form>
+<div>
+    <div class="row pt-5">
+        <div class="col-md-6 offset-md-3 pt-5">
+            <div class="card card-plain card-white">
+                <div class="card-header"><h1>Unit</h1></div>
+                <div class="card-body">
+                    <main class="main-content">
+                        
+                        <br>
+                        <!-- Dropdown button for create -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary bg-gradient-dark mb-0 dropdown-toggle" type="button" id="createNewUnitDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Create New Unit
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="createNewUnitDropdown">
+                                <form class="px-4 py-3" action="{% url 'create_unit' %}" method="post">
+                                    {% csrf_token %}
+                                    {{ form|crispy }}
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Unit List -->
+                        <ul class="list-group">
+                            {% for unit in units %}
+                            <li class="list-group-item">
+                                {{ unit.title }}
+                                <!-- Buttons for Detail, Update, and Delete -->
+                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#detailModal{{ unit.id }}">Detail</button>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#updateModal{{ unit.id }}">Update</button>
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ unit.id }}">Delete</button>
+                            </li>
+                    
+                            <!-- Detail Modal -->
+                            <div class="modal fade" id="detailModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="detailModal{{ unit.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="detailModal{{ unit.id }}Label">Unit Detail</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Title: {{ unit.title }}</p>
+                                            <p>Organization: {{ unit.organization }}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <!-- Update Modal -->
+                            <div class="modal fade" id="updateModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModal{{ unit.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="updateModal{{ unit.id }}Label">Update Unit</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{% url 'update_unit' unit.id %}" method="post">
+                                                {% csrf_token %}
+                                                {{ form|crispy }}
+                                                <button type="submit" class="btn btn-primary">Save</button>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModal{{ unit.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModal{{ unit.id }}Label">Confirm Delete Unit</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete the unit "{{ unit.title }}"?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="{% url 'delete_unit' unit.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            {% endfor %}
+                        </ul>
+                    </main>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- Unit List -->
-    <ul class="list-group">
-        {% for unit in units %}
-        <li class="list-group-item">
-            {{ unit.title }}
-            <!-- Buttons for Detail, Update, and Delete -->
-            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#detailModal{{ unit.id }}">Detail</button>
-            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#updateModal{{ unit.id }}">Update</button>
-            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ unit.id }}">Delete</button>
-        </li>
-
-        <!-- Detail Modal -->
-        <div class="modal fade" id="detailModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="detailModal{{ unit.id }}Label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detailModal{{ unit.id }}Label">Unit Detail</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Title: {{ unit.title }}</p>
-                        <p>Organization: {{ unit.organization }}</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Update Modal -->
-        <div class="modal fade" id="updateModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModal{{ unit.id }}Label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="updateModal{{ unit.id }}Label">Update Unit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{% url 'update_unit' unit.id %}" method="post">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Delete Modal -->
-        <div class="modal fade" id="deleteModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModal{{ unit.id }}Label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModal{{ unit.id }}Label">Confirm Delete Unit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete the unit "{{ unit.title }}"?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <form action="{% url 'delete_unit' unit.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {% endfor %}
-    </ul>
-</main>
+</div>
 {% endblock content %}
