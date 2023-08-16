@@ -50,20 +50,32 @@ Election
                         <input type="date" class="form-control text-black-50" name="{{ form.end_date.name }}" value="{{ election.end_date }}">
                     </div>
 
-                    <div class="form-group">
-                        {{ form.aspirant_start|as_crispy_field }}
+                    <div class="form-group offset-md-1">
+                        <div class="form-check-label">
+                            <input type="checkbox" class="form-check-input" name="{{ form.aspirant_start.name }}" id="{{ form.aspirant_start.id_for_label }}" {% if election.aspirant_start %}checked{% endif %}>
+                            <label class="form-check-label  " for="{{ form.aspirant_start.id_for_label }}">Aspirant Start</label>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        {{ form.approved_all_contestant|as_crispy_field }}
+                    <div class="form-group offset-md-1">
+                        <div class="form-check-label">
+                            <input type="checkbox" class="form-check-input" name="{{ form.approved_all_contestant.name }}" id="{{ form.approved_all_contestant.id_for_label }}" {% if election.approved_all_contestant %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.approved_all_contestant.id_for_label }}">Approved All Contestant</label>
+                        </div>
                     </div>
 
-                    <div class="form-group ">
-                        {{ form.voting_start|as_crispy_field }}
+                    <div class="form-group offset-md-1">
+                        <div class="form-check-label">
+                            <input type="checkbox" class="form-check-input" name="{{ form.voting_start.name }}" id="{{ form.voting_start.id_for_label }}" {% if election.voting_start %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.voting_start.id_for_label }}">Voting Start</label>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        {{ form.voting_end|as_crispy_field }}
+                    <div class="form-group offset-md-1">
+                        <div class="form-check-label">
+                            <input type="checkbox" class="form-check-input" name="{{ form.voting_end.name }}" id="{{ form.voting_end.id_for_label }}" {% if election.voting_end %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.voting_end.id_for_label }}">Voting End</label>
+                        </div>
                     </div>
                     <button class="btn btn-primary" type="submit">submit</button>
                 </form>
