@@ -2,12 +2,21 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.urls import reverse_lazy
-from .models import Organization,UserOrganization,Unit_department
+from django.http import JsonResponse
+import json
+from .models import (
+    Organization,
+    UserOrganization,
+    Unit_department,
+    Election,
+)
 from .forms import (
     OrganizationForm,
     Unit_departmentForm, 
     ElectionFormStage1,
+    ElectionUpdateForm,
     
 )
 
@@ -106,19 +115,13 @@ def delete_organization(request, organization_id):
 
 @login_required  # Requires the user to be logged in to access this view
 def unit_list(request):
-    # if request.method == 'POST':
-    #     form = Unit_departmentForm(request.POST)
-    #     if form.is_valid():
-    #         form.save()
-    #         return redirect('unit')  # Redirect to the list view after successful creation
-
-    # else:
+   
     form = Unit_departmentForm(request.POST)
 
     user_organizations = Organization.objects.filter(userorganization__member=request.user)
     units = Unit_department.objects.filter(organization__in=user_organizations)
     
-    return render(request, 'election/unit.html', {'units': units, 'form': form})
+    return render(request, 'election/unit.html', {'units': units, 'form': form,'user_organizations': user_organizations })
 
 
 
@@ -141,6 +144,16 @@ def create_unit(request):
     user_organizations = Organization.objects.filter(userorganization__member=request.user)
     units = Unit_department.objects.filter(organization__in=user_organizations)
     return render(request, 'election/unit.html', {'form': form, 'units':units})
+
+
+
+# def get_user_organizations(request):
+    
+#     user = request.user
+#     organizations = Organization.objects.filter(userorganization__member=request.user)
+
+ 
+#     return JsonResponse({'organizations': organizations})
 
 
 
@@ -169,18 +182,63 @@ def delete_unit(request, unit_id):
 
 # Election
 def create_election(request):
-    organizations = Organization.objects.all()
-    departments = Unit_department.objects.all()
-
+    # user = request.user
+    organizations = Organization.objects.filter(userorganization__member=request.user)
+    organizations_json = json.dumps(list(organizations.values("id", "name")))
+    
     if request.method == 'POST':
         form = ElectionFormStage1(request.POST)
         if form.is_valid():
             form.save()
+            redirect('elections')
     else:
+        # initial_data = {'organization': organizations}
         form = ElectionFormStage1()  # Initial form for stage 1
     form = ElectionFormStage1()
     return render(request, 'create_election.html', {'form': form,
-            'organizations': organizations,
-            'departments': departments,
+            'organizations_json': organizations_json,
             }
     )
+
+
+def load_units(request):
+    organization_id = request.GET.get('organization_id')
+    units = Unit_department.objects.filter(organization_id=organization_id)
+    data = {
+        "units": list(units.values("id", "title"))
+    }
+    return JsonResponse(data)
+
+
+@login_required  
+def election_list(request):
+    organizations = Organization.objects.filter(userorganization__member=request.user)
+    election = Election.objects.filter(organization__in=organizations) 
+    form = ElectionFormStage1(request.POST)
+    return render(request, 'election_list.html', {'elections': election, 'form':form})
+
+
+@login_required
+def delete_election(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
+    election.delete()
+    messages.success(request, 'Election deleted successfully.')
+    return redirect('elections')
+
+    
+@login_required
+def update_election(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
+    
+    if request.method == 'POST':
+        form = ElectionUpdateForm(request.POST, instance=election)
+        if form.is_valid():
+            form.save()
+            return redirect('elections')
+        else:
+            print("Form is invalid:", form.errors)
+    else:
+        
+        form = ElectionUpdateForm(instance=election)
+
+    return render(request, 'election_list.html', {'form': form})

@@ -4,13 +4,13 @@
 
 <div class="">
     <div class="row pt-5">
-        <div class="col-md-6 offset-md-3 pt-5">
+        <div class="col-md-6 offset-md-3">
             <div class="card card-plain card-white">
                 <div class="card-header">
                     <h1>Organization</h1>
                 </div>
 
-                <div class="card-body card-white">
+                <div class="card-body">
                     <br>
                     <!-- Dropdown button for create -->
                     <div class="dropdown">
@@ -32,7 +32,7 @@
                     <!-- Organization List -->
                     <ul class="list-group">
                         {% for organization in organizations %}
-                        <li class="list-group-item">
+                        <li class="list-group-item text-black-50">
                             {{ organization.name }} |
                             {{organization.address}}
                             <!-- Buttons for Detail, Update, and Delete -->

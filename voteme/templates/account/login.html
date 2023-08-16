@@ -1,5 +1,6 @@
-{% extends "layouts/base-fullscreen.html" %}
 
+{% extends "layouts/base-fullscreen.html" %}
+{% load static %}
 {% load i18n %}
 {% load account socialaccount %}
 {% load crispy_forms_tags %}
@@ -8,6 +9,17 @@
 {% translate "Sign In" %}
 {% endblock title %}
 {% block content %}
+
+<style>
+  
+  body {
+    background-image: url({% static 'img/background1.jpg' %}); /* Replace with your image file path */
+    background-size: cover; /* Adjust how the image covers the body */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-attachment: fixed; /* Keep the background fixed while scrolling */
+}
+
+</style>
 <div class="content">
   <div class="container">
     <div class="row pt-5">

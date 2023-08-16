@@ -82,3 +82,24 @@ class Election(models.Model):
         """Unicode representation of Election."""
         return str('{}{}'.format(self.organization, self.title))
 
+
+
+class Position(models.Model):
+    title = models.CharField(max_length=50)
+    department = models.ForeignKey(Unit_department, on_delete=models.CASCADE, related_name='positions')
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='positions', null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Aspirant(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='aspirants')
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='aspirants')
+    withdrawn = models.BooleanField(default=False)
+    picture = models.ImageField(upload_to='aspirant_pictures/', null=True, blank=True)
+    manifesto = models.TextField()
+    
+    def __str__(self):
+        return f"{self.user} - {self.position} ({self.election})"

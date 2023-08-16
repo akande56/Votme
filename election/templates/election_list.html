@@ -1,0 +1,139 @@
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+  Elections
+{% endblock title %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container">
+        <div class="row pt-5" >
+            {% for election in elections %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                {{ election.title }}
+            </div>
+            <div class="card-body">
+                <p>Organization: {{ election.organization }}</p>
+                <p>Department: {{ election.department }}</p>
+                <p>Start Date: {{ election.start_date }}</p>
+                <p>End Date: {{ election.end_date }}</p>
+                <p>Aspirant Start: {% if election.aspirant_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Approved All Contestant: {% if election.approved_all_contestant %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Voting Start: {% if election.voting_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Voting End: {% if election.voting_end %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <!-- Add more information as needed -->
+                <div class="card-footer">
+                    <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#updateModal{{ election.id }}">Edit</a>
+                    <a href="#" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">Delete</a>
+                </div>
+                <div class="modal fade" id="updateModal{{ election.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModal{{ election.id }}Label" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateModal{{ election.id }}Label">Update Election</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'update_election' election.id %}">
+                                    {% csrf_token %}
+                                    {{ form.non_field_errors }}
+                
+                                   
+                                    <div class="form-group">
+                                        <label for="{{ form.title.id_for_label }}">Title</label>
+                                        <input type="text" class="form-control text-black-50" name="{{ form.title.name }}" value="{{ election.title }}">
+                                    </div>
+                
+                
+                                    <div class="form-group">
+                                        <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+                                        <input type="date" class="form-control text-black-50" name="{{ form.start_date.name }}" value="{{ election.start_date }}">
+                                        {{election.start_date}}
+                                    </div>
+                
+                                    <div class="form-group">
+                                        <label for="{{ form.end_date.id_for_label }}">End Date</label>
+                                        <input type="date" class="form-control text-black-50" name="{{ form.end_date.name }}" value="{{ election.end_date }}">
+                                    </div>
+                
+                                    <div class="form-group offset-md-1">
+                                        <div class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" name="{{ form.aspirant_start.name }}" id="{{ form.aspirant_start.id_for_label }}" {% if election.aspirant_start %}checked{% endif %}>
+                                            <label class="form-check-label  " for="{{ form.aspirant_start.id_for_label }}">Aspirant Start</label>
+                                        </div>
+                                    </div>
+                
+                                    <div class="form-group offset-md-1">
+                                        <div class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" name="{{ form.approved_all_contestant.name }}" id="{{ form.approved_all_contestant.id_for_label }}" {% if election.approved_all_contestant %}checked{% endif %}>
+                                            <label class="form-check-label" for="{{ form.approved_all_contestant.id_for_label }}">Approved All Contestant</label>
+                                        </div>
+                                    </div>
+                
+                                    <div class="form-group offset-md-1">
+                                        <div class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" name="{{ form.voting_start.name }}" id="{{ form.voting_start.id_for_label }}" {% if election.voting_start %}checked{% endif %}>
+                                            <label class="form-check-label" for="{{ form.voting_start.id_for_label }}">Voting Start</label>
+                                        </div>
+                                    </div>
+                
+                                    <div class="form-group offset-md-1">
+                                        <div class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" name="{{ form.voting_end.name }}" id="{{ form.voting_end.id_for_label }}" {% if election.voting_end %}checked{% endif %}>
+                                            <label class="form-check-label" for="{{ form.voting_end.id_for_label }}">Voting End</label>
+                                        </div>
+                                    </div>
+                
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    {% if forloop.counter|divisibleby:"3" %}
+    </div><div class="row">
+    {% endif %}
+    {% endfor %}
+        </div>
+        
+    </div>
+</div>
+<!-- Update and Delete Election Modals -->
+{% for election in elections %}
+<!-- Update Election Modal -->
+
+<!-- Delete Election Modal -->
+<div class="modal fade" id="deleteModal{{ election.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModal{{ election.id }}Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModal{{ election.id }}Label">Delete Election</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the election "{{ election.title }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="{% url 'delete_election' election.id %}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock content %}

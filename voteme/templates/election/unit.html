@@ -19,22 +19,39 @@
                             <div class="dropdown-menu" aria-labelledby="createNewUnitDropdown">
                                 <form class="px-4 py-3" action="{% url 'create_unit' %}" method="post">
                                     {% csrf_token %}
-                                    {{ form|crispy }}
+                                    {{ form.non_field_errors }}
+                        
+                                    <div class="form-group">
+                                        <label for="{{ form.organization.id_for_label }}">Organization</label>
+                                        <select class="form-control" name="{{ form.organization.name }}" id="{{ form.organization.id_for_label }}">
+                                            {% for organization in user_organizations %}
+                                                <option value="{{ organization.id }}">{{ organization.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                        
+                                    {{ form.title.label_tag }}
+                                    {{ form.title }}
+                                    {{ form.title.errors }}
+                        
                                     <button type="submit" class="btn btn-primary">Save</button>
                                 </form>
                             </div>
                         </div>
                         
+                        
                         <!-- Unit List -->
                         <ul class="list-group">
                             {% for unit in units %}
-                            <li class="list-group-item">
-                                {{ unit.title }}
+                            <li class="list-group-item text-black-50">
+                                {{ unit.title }} |
+                                {{unit.organization}}
                                 <!-- Buttons for Detail, Update, and Delete -->
                                 <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#detailModal{{ unit.id }}">Detail</button>
                                 <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#updateModal{{ unit.id }}">Update</button>
                                 <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ unit.id }}">Delete</button>
                             </li>
+
                     
                             <!-- Detail Modal -->
                             <div class="modal fade" id="detailModal{{ unit.id }}" tabindex="-1" role="dialog" aria-labelledby="detailModal{{ unit.id }}Label" aria-hidden="true">
@@ -70,7 +87,23 @@
                                         <div class="modal-body">
                                             <form action="{% url 'update_unit' unit.id %}" method="post">
                                                 {% csrf_token %}
-                                                {{ form|crispy }}
+                                                {{ form.non_field_errors }}
+
+                                                <div class="form-group">
+                                                    <label for="{{ form.organization.id_for_label }}">Organization</label>
+                                                    <select class="form-control" name="{{ form.organization.name }}" id="{{ form.organization.id_for_label }}">
+                                                        {% for organization in user_organizations %}
+                                                            <option value="{{ organization.id }}" {% if organization == unit.organization %}selected{% endif %}>{{ organization.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                        
+                            
+                                                <div class="form-group">
+                                                    <label for="{{ form.title.id_for_label }}">Title</label>
+                                                    <input type="text" class="form-control" name="{{ form.title.name }}" value="{{ unit.title }}">
+                                                </div>
+                            
                                                 <button type="submit" class="btn btn-primary">Save</button>
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                             </form>
@@ -106,9 +139,13 @@
                             {% endfor %}
                         </ul>
                     </main>
+                    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock content %}
+
+

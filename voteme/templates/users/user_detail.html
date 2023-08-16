@@ -10,10 +10,19 @@
   
 {% endblock title %}
 {% block content %}
+
+<style>
+  .row {
+    background-image: url({% static 'img/election.jpg' %}); /* Replace with your image file path */
+    background-size: cover; /* Adjust how the image covers the div */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-attachment: fixed; /* Keep the background fixed while scrolling */
+}
+</style>
   <div class="content">
     <div class="row">
-      <div class="col-md-12">
-        <div class="container mt-5 offset-md-3">
+      <div class="col-md-7">
+        <div class="container mt-5 offset-md-2">
           <div class="card card-plain">
             <div class="row">
               <div class="col-sm-12">
@@ -36,6 +45,9 @@
           {% endif %}
           </div>
       </div>
+      </div>
+      
+
       </div>
     </div>
   </div>

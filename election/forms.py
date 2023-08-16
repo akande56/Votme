@@ -30,3 +30,15 @@ class ElectionFormStage1(forms.ModelForm):
     class Meta:
         model= Election
         fields = '__all__'
+
+
+class ElectionUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Election
+        fields = ['title', 'start_date', 'end_date', 'aspirant_start', 'approved_all_contestant', 'voting_start', 'voting_end']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Set required attribute to False for each form field
+        for field_name in self.fields:
+            self.fields[field_name].required = False

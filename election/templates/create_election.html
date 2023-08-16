@@ -1,55 +1,153 @@
 {% extends 'layoutss/base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block title %}
 Election
 {% endblock title %}
 
 {% block content %}
 
-<div class="row pt-5">
-    <div class="col-md-6 offset-md-3 pt-5">
+
+
+<div class="row">
+    <div class="col-md-3 offset-md-3 pt-5">
+    
         <div class="card card-plain">
             <div class="card-header">Election Form</div>
             <div class="card-body">
-                
+
                 <form method="post">
                     {% csrf_token %}
-                   {{form|crispy}}
-                   <button type="submit">submit</button>
+                    <div class="form-group">
+                        <label for="{{ form.organization.id_for_label }}">Organization</label>
+                        <select class="form-control" name="{{ form.organization.name }}" id="{{ form.organization.id_for_label }}">
+                            <option value="" selected disabled>Select an organization</option>
+                            <script>
+                                var organizations = {{ organizations_json|safe }};
+                                for (var i = 0; i < organizations.length; i++) {
+                                    var option = new Option(organizations[i].name, organizations[i].id);
+                                    document.querySelector("select[name='{{ form.organization.name }}']").appendChild(option);
+                                }
+                            </script>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.title|as_crispy_field }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.department|as_crispy_field }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+                        <input type="date" class="form-control text-black-50" name="{{ form.start_date.name }}" value="{{ election.start_date }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.end_date.id_for_label }}">End Date</label>
+                        <input type="date" class="form-control text-black-50" name="{{ form.end_date.name }}" value="{{ election.end_date }}">
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.aspirant_start|as_crispy_field }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.approved_all_contestant|as_crispy_field }}
+                    </div>
+
+                    <div class="form-group ">
+                        {{ form.voting_start|as_crispy_field }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.voting_end|as_crispy_field }}
+                    </div>
+                    <button class="btn btn-primary" type="submit">submit</button>
                 </form>
-                
+
+            </div>
+        </div>  
+    </div>
+    <div class="col-md-6 pt-5">
+        <div class="card card-plain">
+            
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table tablesorter">
+                        <thead class="text-primary"><tr><th>Instruction</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><p><span class="text-info">*</span> Startdate must come before Enddate</p></td>
+                            </tr>
+                            <tr>
+                                <td><p><span class="text-info">**</span> Set aspirant_start; to enable aspirant vet for position, upload manifesto etc.</p></td>
+                            </tr>
+                            <tr>
+                                <td><p><span class="text-info">***</span> Set voting_start and voting_end to start and end election</p></td>
+                            </tr>
+                            <tr>
+                                <td><p><span class="text-info">****</span> Membership_size in organization determine number of peaple that can vote, this is to prevent <strong class="text-danger">Overvotting</strong> </p></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-    let currentStage = {{ current_stage }};
 
-    function showStage(stage) {
-        document.querySelectorAll('.card').forEach((card, index) => {
-            if (index + 1 === stage) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        currentStage = stage;
-    }
 
-    function nextStage() {
-        if (currentStage < 5) {
-            showStage(currentStage + 1);
-        }
-    }
-
-    function prevStage() {
-        if (currentStage > 1) {
-            showStage(currentStage - 1);
-        }
-    }
-
-    // Initialize by showing the current stage
-    showStage(currentStage);
-</script>
 
 {% endblock content %}
+
+
+{% block javascripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var organizationSelect = document.querySelector("select[name='{{ form.organization.name }}']");
+        var unitSelect = document.querySelector("select[name='{{ form.department.name }}']");
+        console.log(unitSelect)
+        console.log(organizationSelect)
+
+        // Function to update unit options based on selected organization
+        function updateUnitOptions(selectedOrganizationId) {
+            unitSelect.innerHTML = ""; // Clear existing options
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "{% url 'load_units' %}?organization_id=" + selectedOrganizationId, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText);
+                        data.units.forEach(function(unit) {
+                            var option = document.createElement("option");
+                            option.value = unit.id;
+                            option.textContent = unit.title;
+                            unitSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error("Failed to load units.");
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // Listen for changes in the organization select field
+        organizationSelect.addEventListener("change", function() {
+            var selectedOrganizationId = this.value;
+            updateUnitOptions(selectedOrganizationId);
+        });
+
+        // Trigger initial update based on selected organization (if any)
+        var initialSelectedOrganizationId = organizationSelect.value;
+        if (initialSelectedOrganizationId) {
+            updateUnitOptions(initialSelectedOrganizationId);
+        }
+    });
+</script>
+
+{% endblock javascripts %}
+    
