@@ -1,12 +1,12 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Organization, Unit_department,UserOrganization, Election
+from .models import Organization, Unit_department,UserOrganization, Election, Position
 
 
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
-        fields = '__all__'
+        exclude = ['create_by']
 
 
 class Unit_departmentForm(forms.ModelForm):
@@ -42,3 +42,13 @@ class ElectionUpdateForm(forms.ModelForm):
         # Set required attribute to False for each form field
         for field_name in self.fields:
             self.fields[field_name].required = False
+
+
+class PositionForm(forms.ModelForm):
+    """Form definition for Position."""
+
+    class Meta:
+        """Meta definition for Positionform."""
+
+        model = Position
+        exclude = ['election']

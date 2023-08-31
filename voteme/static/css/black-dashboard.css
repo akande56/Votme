@@ -3988,13 +3988,13 @@ input[type="button"].btn-block {
   .alert-info .alert-link {
     color: #0772db; }
 
-.alert-warning {
+.alert-error {
   color: #ff8d72;
   background-color: #ff9f89;
   border-color: #ff9f89; }
-  .alert-warning hr {
+  .alert-error hr {
     border-top-color: #ff8a70; }
-  .alert-warning .alert-link {
+  .alert-error .alert-link {
     color: #ff643f; }
 
 .alert-danger {

@@ -3,9 +3,9 @@
 {% block content %}
 
 <div class="">
-    <div class="row pt-5">
-        <div class="col-md-6 offset-md-3">
-            <div class="card card-plain card-white">
+    <div class="row pt-2">
+        <div class="col-md-8 ">
+            <div class="card card-plain card-dark offset-md-1">
                 <div class="card-header">
                     <h1>Organization</h1>
                 </div>
@@ -27,21 +27,26 @@
                             </form>
                         </div>
                     </div>
-
+                    <br>
 
                     <!-- Organization List -->
                     <ul class="list-group">
+                        <li class="list-group-item ">
+                            <p class="text-black-50">Organization name || <span class="text-black-50">Address</span></p>
+                        </li>
                         {% for organization in organizations %}
                         <li class="list-group-item text-black-50">
-                            {{ organization.name }} |
+                            <i class="tim-icons icon-bullet-list-67 bg-light"></i> {{ organization.name }} |
                             {{organization.address}}
                             <!-- Buttons for Detail, Update, and Delete -->
-                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
-                                data-target="#detailModal{{ organization.id }}">Detail</button>
-                            <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
-                                data-target="#updateModal{{ organization.id }}">Update</button>
-                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
-                                data-target="#deleteModal{{ organization.id }}">Delete</button>
+                            <div>
+                                <button type="button" class="btn btn-primary btn-sm ml-5" data-toggle="modal"
+                                    data-target="#detailModal{{ organization.id }}">Detail</button>
+                                <button type="button" class="btn btn-info btn-sm ml-5" data-toggle="modal"
+                                    data-target="#updateModal{{ organization.id }}">Update</button>
+                                <button type="button" class="btn btn-danger btn-sm ml-5" data-toggle="modal"
+                                    data-target="#deleteModal{{ organization.id }}">Delete</button>
+                            </div>
                         </li>
 
                         <!-- Detail Modal -->
@@ -89,7 +94,7 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    
+
                                     <form action="{% url 'update_organization' organization.id %}" method="post">
                                         {% csrf_token %}
                                         <div>

@@ -11,6 +11,7 @@ class Organization(models.Model):
     address = models.CharField(max_length=50)
     contact = models.CharField(max_length=50)
     membership_size = models.IntegerField(help_text='help for check on multple signup, can be updated if neccessary')
+    create_by =  models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         """Meta definition for Organization."""
@@ -62,11 +63,11 @@ class UserOrganization(models.Model):
 
 class Election(models.Model):
     """Model definition for Election."""
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, blank=True)
     organization = models.ForeignKey(to=Organization, null=True ,on_delete=models.SET_NULL, related_name='ElectionOrganization')
     department = models.ForeignKey(to=Unit_department, null=True ,on_delete=models.SET_NULL, related_name='ElectionDepartment')
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(blank=True)
+    end_date = models.DateField(blank=True)
     aspirant_start = models.BooleanField(default=False)
     approved_all_contestant = models.BooleanField(default=False)
     voting_start = models.BooleanField(default=False)
@@ -88,6 +89,7 @@ class Position(models.Model):
     title = models.CharField(max_length=50)
     department = models.ForeignKey(Unit_department, on_delete=models.CASCADE, related_name='positions')
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='positions', null=True, blank=True)
+    num_of_contestant = models.IntegerField(default=0, blank=True)
 
     def __str__(self):
         return self.title
@@ -95,6 +97,7 @@ class Position(models.Model):
 
 class Aspirant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, blank=True, default="default name")
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='aspirants')
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='aspirants')
     withdrawn = models.BooleanField(default=False)
@@ -103,3 +106,17 @@ class Aspirant(models.Model):
     
     def __str__(self):
         return f"{self.user} - {self.position} ({self.election})"
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    aspirant = models.ForeignKey(Aspirant, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'position', 'election')  # To ensure a user can only vote once per position in an election
+
+    def __str__(self):
+        return f"Vote by {self.user} for {self.position} in {self.election}"
+

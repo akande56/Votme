@@ -1,0 +1,115 @@
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}
+Aspirant
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5 pt-5">
+        <div class="card card-plain">
+            <div class="card-header">
+                <p>Election: {{ election.title }}</p>
+            </div>
+            <div class="card-body">
+                <h1>Signup for Position</h1>
+                <!-- Display election information -->
+
+                <!-- Aspirant signup form -->
+                <form id="signup-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="position">Select Position:</label>
+                        <select class="form-control" name="position" id="position">
+                            {% for position in positions %}
+                            <option value="{{ position.id }}">{{ position.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <input class="form-control" type="text" name="aspirant_name" id="aspirant-name"
+                            placeholder="Aspirant Name">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="manifesto" id="aspirant-manifesto"
+                            placeholder="Manifesto">
+                    </div>
+                    <div>
+                        <input type="file" name="aspirant_picture" id="aspirant-picture" accept="image/*">
+                    </div>
+                    <button class="btn" id="add-aspirant-btn" type="button">Add Aspirant</button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5 pt-5">
+        <h2>Aspirants:</h2>
+        <ul class="list" id="aspirants-list">
+            {% for aspirant in aspirants %}
+            <li>{{aspirant.name}} for post: {{aspirant.position}}</li>
+            {% endfor %}
+            <!-- This will be dynamically updated by JavaScript -->
+        </ul>
+    </div>
+</div>
+{% endblock content %}
+
+
+{% block javascripts %}
+<!-- ... Rest of the template ... -->
+
+
+<script>
+    var csrfToken = "{{ csrf_token }}";
+    // JavaScript code for handling individual aspirant signup and updating the aspirants list
+    var addAspirantBtn = document.getElementById("add-aspirant-btn");
+    var aspirantsList = document.getElementById("aspirants-list");
+
+    addAspirantBtn.addEventListener("click", function () {
+    var positionId = document.getElementById("position").value;
+    var selectedPosition = document.getElementById("position").options[document.getElementById("position").selectedIndex];
+    var selectedPositionText = selectedPosition ? selectedPosition.textContent : "Unknown Position";
+    var aspirantName = document.getElementById("aspirant-name").value;
+    var manifesto = document.getElementById("aspirant-manifesto").value;
+    var picture = document.getElementById("aspirant-picture").files[0];
+
+    var formData = new FormData();
+    formData.append("position", positionId);
+    formData.append("aspirant_name", aspirantName);
+    formData.append("manifesto", manifesto);
+    formData.append("aspirant_picture", picture);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "{% url 'aspirant_signup' election.id %}", true);
+
+    // Set the CSRF token in the request headers
+    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                // Clear form inputs
+                document.getElementById("position").value = "";
+                document.getElementById("aspirant-name").value = "";
+                document.getElementById("aspirant-manifesto").value = "";
+                document.getElementById("aspirant-picture").value = "";
+
+                // Append new aspirant to the list
+                var newAspirantItem = document.createElement("li");
+                newAspirantItem.textContent = aspirantName + " for post: " + selectedPositionText;
+                aspirantsList.appendChild(newAspirantItem);
+            } else {
+                console.error("An error occurred while adding the aspirant.");
+            }
+        }
+    };
+    xhr.send(formData);
+});
+
+
+</script>
+
+{% endblock javascripts %}

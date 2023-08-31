@@ -14,8 +14,10 @@ urlpatterns = [
     path('unit/list-and-create/delete/<int:unit_id>/', views.delete_unit, name='delete_unit'),
     path('create_election/', views.create_election, name='create_election'),
     path('elections/', views.election_list, name='elections'),
+    path('elections/aspirant_signup/<int:election_id>/', views.aspirant_signup, name='aspirant_signup'),
     path('elections/update/<int:election_id>/', views.update_election, name='update_election'),
     path('elections/delete/<int:election_id>/', views.delete_election, name='delete_election'),
+    path('elections/position/<int:election_id>/', views.position_list, name='position'),
 ]
 
     # path('detail/<int:organization_id>/', views.organization_detail, name='organization_detail'),
