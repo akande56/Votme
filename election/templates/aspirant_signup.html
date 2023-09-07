@@ -6,18 +6,20 @@ Aspirant
 {% endblock title %}
 
 {% block content %}
+
 <div class="row">
-    <div class="col-md-5 pt-5">
+    
+    <div class="col-md-6 pt-5 offset-md-1">
         <div class="card card-plain">
             <div class="card-header">
-                <p>Election: {{ election.title }}</p>
+                <p  class="h1">Election: {{ election.title }}</p>
             </div>
             <div class="card-body">
-                <h1>Signup for Position</h1>
+                <h1 class="h4">Signup for Position</h1>
                 <!-- Display election information -->
 
                 <!-- Aspirant signup form -->
-                <form id="signup-form" enctype="multipart/form-data">
+                <form id="signup-form" enctype="multipart/form-data" >
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="position">Select Position:</label>
@@ -45,14 +47,31 @@ Aspirant
             </div>
         </div>
     </div>
-    <div class="col-md-5 pt-5">
-        <h2>Aspirants:</h2>
-        <ul class="list" id="aspirants-list">
-            {% for aspirant in aspirants %}
-            <li>{{aspirant.name}} for post: {{aspirant.position}}</li>
-            {% endfor %}
-            <!-- This will be dynamically updated by JavaScript -->
-        </ul>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-5">
+                <h2>Aspirants</h2>
+                <ul class="list list-group" id="aspirants-list">
+                    {% for aspirant in aspirants %}
+                    <li class="list-group-item text-black-50" data-aspirant-id="{{ aspirant.id }}">
+                        <a href="#" class="aspirant-link" data-aspirant-id="{{ aspirant.id }}">
+                            {{aspirant.name}} for post: {{aspirant.position}}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    <!-- This will be dynamically updated by JavaScript -->
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <!-- Details Column -->
+                <div id="aspirant-details" >
+                    
+                    <!-- Details of the selected aspirant will be displayed here -->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock content %}
@@ -99,8 +118,10 @@ Aspirant
 
                 // Append new aspirant to the list
                 var newAspirantItem = document.createElement("li");
+                newAspirantItem.className = "list-group-item, text-black-50";
                 newAspirantItem.textContent = aspirantName + " for post: " + selectedPositionText;
                 aspirantsList.appendChild(newAspirantItem);
+                window.alert("Aspirant added successfully!");
             } else {
                 console.error("An error occurred while adding the aspirant.");
             }
@@ -111,5 +132,53 @@ Aspirant
 
 
 </script>
+<script>
 
+    // JavaScript code for handling aspirant details display
+    const aspirantLinks = document.querySelectorAll(".aspirant-link");
+    const detailsColumn = document.getElementById("aspirant-details");
+    console.log(aspirantLinks)
+    aspirantLinks.forEach(link => {
+        link.addEventListener("click", function (event) {
+            console.log('ssssssssssssffffffff')
+            event.preventDefault(); // Prevent the default link behavior
+            const selectedAspirantId = link.getAttribute("data-aspirant-id");
+            
+            // Create an XMLHttpRequest object
+            const xhr = new XMLHttpRequest();
+            
+            // Define the URL for fetching aspirant details
+            const url = "{% url 'get_aspirant_details' %}?aspirant_id=" + selectedAspirantId;
+            
+            xhr.open("GET", url, true);
+            
+            // Set up the callback function to handle the response
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        
+                        // Create an HTML template for displaying aspirant details
+                        const detailsHTML = `
+                            <div class="text-center">
+                                <img src="${data.photo_url}" alt="${data.name}'s Photo" width="200">
+                                <h3>${data.name}</h3>
+                            </div>
+                            <p>Position: ${data.position}</p>
+                            <p>Manifesto: ${data.manifesto}</p>
+                        `;
+                        
+                        // Display the aspirant details
+                        detailsColumn.innerHTML = detailsHTML;
+                    } else {
+                        console.error("Error fetching aspirant details. Status: " + xhr.status);
+                    }
+                }
+            };
+            
+            // Send the request
+            xhr.send();
+        });
+    });
+</script>
 {% endblock javascripts %}

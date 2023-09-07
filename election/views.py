@@ -73,7 +73,7 @@ def update_organization(request, organization_id):
 
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to update this organization.")
-        messages.error(request, 'You neet to be the one who added the organization..')
+        messages.error(request, 'You need to be the one who added/created the organization..')
         return redirect('home')  # Redirect to home with an error message
 
     if request.method == 'POST':
@@ -92,8 +92,8 @@ def delete_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
 
     if organization.create_by != request.user:
-        messages.error(request, "You do not have permission to update this organization.")
-        messages.error(request, 'You neet to be the one who added the organization..')
+        messages.error(request, "You do not have permission to delete this organization.")
+        messages.error(request, 'You need to be the one who added/created the organization..')
         return redirect('home')  # Redirect to home with an error message
 
     if request.method == 'POST':
@@ -143,20 +143,21 @@ def unit_list(request):
 def create_unit(request):
     form = Unit_departmentForm(request.POST)
     if form.is_valid():
-        unit = form.save()
         organization_id = request.POST.get('organization')
         organization = get_object_or_404(Organization, id=organization_id)
         if organization.create_by != request.user:
             messages.error(request, "You do not have permission to update this organization.")
-            return redirect('home')
-
-        try:
-            organization = Organization.objects.get(id=organization_id)
-        except Organization.DoesNotExist:
             return redirect('unit')
-        if organization in Organization.objects.filter(userorganization__member=request.user):
-            unit.organization = organization
-            unit.save()
+
+        else:
+            try:
+                organization = Organization.objects.get(id=organization_id)
+            except Organization.DoesNotExist:
+                return redirect('unit')
+            if organization in Organization.objects.filter(userorganization__member=request.user):
+                unit = form.save()
+                unit.organization = organization
+                unit.save()
 
     else:
         form = Unit_departmentForm()
@@ -195,9 +196,6 @@ def update_unit(request, unit_id):
 
 def delete_unit(request, unit_id):
     unit = get_object_or_404(Unit_department, id=unit_id)
-    print(unit)
-    print(unit.organization)
-    print(unit.organization.create_by)
     if request.method == 'POST':
         organization = unit.organization
         if organization.create_by != request.user:
@@ -222,7 +220,7 @@ def create_election(request):
             if organization.create_by != request.user:
                 messages.error(request, "You do not have permission to create an election for this organization.")
                 return redirect('create_election')
-            messages.success(request,'success; election created successfully')
+            messages.success(request, 'success; election created successfully')
             form.save()
             return redirect('elections')
     else:
@@ -267,7 +265,7 @@ def delete_election(request, election_id):
 @login_required
 def update_election(request, election_id):
     election = get_object_or_404(Election, id=election_id)
-    
+
     organization = election.organization
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to update.")
@@ -309,7 +307,7 @@ def position_list(request, election_id):
     if request.method == 'POST':
 
         if form.is_valid():
-            
+
             if Organization.create_by != request.user:
                 messages.error(request, "You do not have permission to add positions to election.")
                 return redirect('elections')
@@ -325,7 +323,7 @@ def position_list(request, election_id):
     return render(request, 'position.html', context)
 
 
-#Aspirant
+# Aspirant
 def aspirant_signup(request, election_id):
     try:
         election = Election.objects.get(id=election_id)
@@ -348,7 +346,7 @@ def aspirant_signup(request, election_id):
             user=request.user,
             election=election,
             position=position,
-            name = aspirant_name,
+            name=aspirant_name,
             manifesto=manifesto
         )
 
@@ -366,3 +364,23 @@ def aspirant_signup(request, election_id):
         "aspirants": sorted_aspirants,
     }
     return render(request, "aspirant_signup.html", context)
+
+
+def get_aspirant_details(request):
+    aspirant_id = request.GET.get('aspirant_id')  # Assuming the aspirant ID is passed as a query parameter
+
+    try:
+        aspirant = Aspirant.objects.get(id=aspirant_id)
+
+        # Create a dictionary with aspirant details, including the photo URL
+        aspirant_details = {
+            'id': aspirant.id,
+            'name': aspirant.name,
+            'position': aspirant.position.title,  # Assuming 'position' has a 'title' field
+            'manifesto': aspirant.manifesto,
+            'photo_url': aspirant.picture.url if aspirant.picture else '',  # Assuming 'picture' is the ImageField
+        }
+
+        return JsonResponse(aspirant_details)
+    except Aspirant.DoesNotExist:
+        return JsonResponse({'error': 'Aspirant not found'}, status=404)

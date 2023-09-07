@@ -10,7 +10,7 @@ class Organization(models.Model):
     description = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
     contact = models.CharField(max_length=50)
-    membership_size = models.IntegerField(help_text='help for check on multple signup, can be updated if neccessary')
+    membership_size = models.IntegerField(help_text='help for counter overvotting, can be updated if neccessary')
     create_by =  models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
