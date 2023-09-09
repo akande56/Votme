@@ -175,6 +175,7 @@ def create_unit(request):
                 unit = form.save()
                 unit.organization = organization
                 unit.save()
+                messages.success(request, "New unit/department added successfully....")
 
     else:
         form = Unit_departmentForm()
@@ -372,8 +373,9 @@ def aspirant_signup(request, election_id):
         if picture:
             aspirant.picture = picture
             aspirant.save()
-
-        return JsonResponse({"message": "Signup successful"})
+        else:
+            aspirant.save()
+        messages.success(request, "New aspirant registered successfully..")
 
     context = {
         "election": election,
