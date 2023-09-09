@@ -1,0 +1,34 @@
+{% extends "layoutss/base.html" %}
+{% load static %}
+
+{% block title %}
+  Election Results
+{% endblock title %}
+
+{% block content %}
+<div class="content">
+  <div class="container col-md-9">
+    <h1>Election Results: {{ election.title }}</h1>
+
+    {% for position_result in results %}
+    <h2 class="text-primary mt-5 mb-0">Contestant for {{ position_result.position.title }}</h2>
+    <div class="list-group">
+      {% for aspirant_vote in position_result.aspirant_votes %}
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <span class="text-dark">{{ aspirant_vote.aspirant.name }}</span>
+          <span class="text-danger">{{ aspirant_vote.vote_count }} Votes</span>
+        </div>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ aspirant_vote.vote_count }}%;" aria-valuenow="{{ aspirant_vote.vote_count }}" aria-valuemin="0" aria-valuemax="1000000">
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% empty %}
+    <p>No results available yet....</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

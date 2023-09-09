@@ -7,7 +7,7 @@ Aspirant
 
 {% block content %}
 
-<div class="row">
+<div class="content">
     
     <div class="col-md-6 pt-5 offset-md-1">
         <div class="card card-plain">
@@ -15,7 +15,8 @@ Aspirant
                 <p  class="h1">Election: {{ election.title }}</p>
             </div>
             <div class="card-body">
-                <h1 class="h4">Signup for Position</h1>
+                <h1 class="h4"> Contest for <span class="text-primary">Position</span></h1>
+                
                 <!-- Display election information -->
 
                 <!-- Aspirant signup form -->
@@ -40,7 +41,8 @@ Aspirant
                     <div>
                         <input type="file" name="aspirant_picture" id="aspirant-picture" accept="image/*">
                     </div>
-                    <button class="btn" id="add-aspirant-btn" type="button">Add Aspirant</button>
+                    <button class="btn btn-primary" id="add-aspirant-btn" type="button">
+                        Add Aspirant</button>
 
                 </form>
 
@@ -48,27 +50,35 @@ Aspirant
         </div>
     </div>
 </div>
-<div class="card">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-5">
-                <h2>Aspirants</h2>
-                <ul class="list list-group" id="aspirants-list">
-                    {% for aspirant in aspirants %}
-                    <li class="list-group-item text-black-50" data-aspirant-id="{{ aspirant.id }}">
-                        <a href="#" class="aspirant-link" data-aspirant-id="{{ aspirant.id }}">
-                            {{aspirant.name}} for post: {{aspirant.position}}
-                        </a>
-                    </li>
-                    {% endfor %}
-                    <!-- This will be dynamically updated by JavaScript -->
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <!-- Details Column -->
-                <div id="aspirant-details" >
-                    
-                    <!-- Details of the selected aspirant will be displayed here -->
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-inline">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <h2 class="h1 badge-primary">Aspirants</h2>
+                            <ul class="list-group list-group-flush" id="aspirants-list">
+                                {% for aspirant in aspirants %}
+                                <li class="list-inline-item text-black-50 mt-3" data-aspirant-id="{{ aspirant.id }}">
+                                    <p class="d-inline-block">for post: {{aspirant.position}}</p>
+                                    <a href="#" class="aspirant-link" data-aspirant-id="{{ aspirant.id }}">
+                                        {{aspirant.name}}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                                <!-- This will be dynamically updated by JavaScript -->
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Details Column -->
+                            <p class="text-primary h3 badge-secondary" >Aspirant Portofolio</p>
+                            <div id="aspirant-details" >
+                                
+                                <!-- Details of the selected aspirant will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

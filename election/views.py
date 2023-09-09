@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
+from django.db.models import Count
 import json
 from .models import (
     Organization,
@@ -13,6 +14,7 @@ from .models import (
     Election,
     Position,
     Aspirant,
+    Vote,
 )
 from .forms import (
     OrganizationForm,
@@ -32,16 +34,18 @@ def organization_list(request):
         if form.is_valid():
             form.save()
             return redirect('organization_list')  # Redirect to the list view after successful creation
-
     else:
         form = OrganizationForm()
 
-    # Filter organizations based on the current logged-in user's membership
+    # Get organizations where the user has a UserOrganization instance
     user_organizations = UserOrganization.objects.filter(member=request.user)
-    # Get the list of organizations from the filtered UserOrganization instances
-    organizations = [user_org.organization for user_org in user_organizations]
+    organizations_with_membership = [user_org.organization for user_org in user_organizations]
 
-    return render(request, 'election/organization_list.html', {'organizations': organizations, 'form': form})
+    # Get organizations where the user does not have a UserOrganization instance
+    all_organizations = Organization.objects.all()
+    organizations_without_membership = [org for org in all_organizations if org not in organizations_with_membership]
+
+    return render(request, 'election/organization_list.html', {'organizations_with_membership': organizations_with_membership, 'organizations_without_membership': organizations_without_membership, 'form': form})
 
 
 @login_required  # Requires the user to be logged in to access this view
@@ -65,6 +69,19 @@ def create_organization(request):
         form = OrganizationForm()
 
     return render(request, 'election/organization_list.html', {'form': form})
+create_organization
+
+
+
+@login_required
+def join_organization(request, organization_id):
+    user = request.user
+    organization = get_object_or_404(Organization, id = organization_id)
+    UserOrganization.objects.create(member=user, organization = organization)
+    messages.success(request, 'You have successful join')
+    
+    return redirect('organization_list')
+
 
 
 @login_required  # Requires the user to be logged in to access this view
@@ -94,7 +111,7 @@ def delete_organization(request, organization_id):
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to delete this organization.")
         messages.error(request, 'You need to be the one who added/created the organization..')
-        return redirect('home')  # Redirect to home with an error message
+        return redirect('organization_list')  # Redirect to home with an error message
 
     if request.method == 'POST':
         organization.delete()
@@ -351,7 +368,7 @@ def aspirant_signup(request, election_id):
         )
 
         # Handle aspirant picture upload
-        picture = request.FILES.get("aspirant_picture")
+        picture = request.FILES.get("aspiransorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)t_picture")
         if picture:
             aspirant.picture = picture
             aspirant.save()
@@ -384,3 +401,67 @@ def get_aspirant_details(request):
         return JsonResponse(aspirant_details)
     except Aspirant.DoesNotExist:
         return JsonResponse({'error': 'Aspirant not found'}, status=404)
+
+
+
+## voting
+@login_required
+def vote_view(request, election_id):
+    try:
+        election = Election.objects.get(id=election_id)
+    except Election.DoesNotExist:
+        return redirect('elections')  # Redirect to a suitable page if the election does not exist
+
+    if request.method == 'POST':
+        # Handle the POST request for voting
+        user = request.user
+        position_id = request.POST.get('position_id')
+        aspirant_id = request.POST.get('aspirant_id')
+
+        # Check if the user has already voted for this position in the election
+        existing_vote = Vote.objects.filter(user=user, election=election, position_id=position_id).first()
+
+        if existing_vote:
+            # User has already voted for this position in the election
+            return JsonResponse({'message': 'You have already voted for this position in this election.'}, status=400)
+        else:
+            # Create a new vote record
+            vote = Vote(user=user, election=election, position_id=position_id, aspirant_id=aspirant_id)
+            vote.save()
+            return JsonResponse({'message': 'Vote recorded successfully.'}, status=200)
+
+    # Handle the GET request to display the aspirants for the election
+    aspirants = Aspirant.objects.filter(election=election)
+    sorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)
+
+    return render(request, 'vote_view.html', {'election': election, 'aspirants': sorted_aspirants})
+
+
+def election_results(request, election_id):
+    # Get the election object
+    election = get_object_or_404(Election, id=election_id)
+
+    # Get positions for the specific election
+    positions = Position.objects.filter(election=election)
+
+    # Now, you can fetch results for each position and each aspirant
+    results = []
+    for position in positions:
+        # Fetch all aspirants for this position in the specific election
+        aspirants = Aspirant.objects.filter(position=position, election=election)
+
+        # Calculate the number of votes for each aspirant in this position
+        aspirant_votes = []
+        for aspirant in aspirants:
+            vote_count = Vote.objects.filter(position=position, aspirant=aspirant).count()
+            aspirant_votes.append({
+                'aspirant': aspirant,
+                'vote_count': vote_count,
+            })
+
+        results.append({
+            'position': position,
+            'aspirant_votes': aspirant_votes,
+        })
+        print(results)
+    return render(request, 'election/election_results.html', {'election': election, 'results': results})

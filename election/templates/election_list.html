@@ -14,7 +14,7 @@
             {% for election in elections %}
     <div class="col-md-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header h2 text-dark">
                 {{ election.title }}
             </div>
             <div class="card-body">
@@ -28,10 +28,16 @@
                 <p>Voting End: {% if election.voting_end %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
                 <!-- Add more information as needed -->
                 <div class="card-footer">
-                    <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#updateModal{{ election.id }}">Edit</a>
-                    <a href="#" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">Delete</a>
-                    <a href="{% url 'position' election.id  %}" class="btn btn-primary">Position</a>
-                    <a href=" {% url 'aspirant_signup' election.id %} ">Aspirant</a>
+                    <a href="#" class="btn btn-info" data-toggle="modal" data-target="#updateModal{{ election.id }}">
+                        <i class="tim-icons icon-pencil"></i>
+                    </a>
+                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">
+                        <i class="tim-icons icon-trash-simple"></i>
+                    </a>
+                    <a href="{% url 'position' election.id  %}" class="btn btn-primary">Post(office)</a>
+                    <a  class="btn btn-secondary" href=" {% url 'aspirant_signup' election.id %} ">Aspirant</a>
+                    <a class="btn btn-warning" href=" {% url 'vote_view' election.id %} ">Vote</a>
+
                 </div>
                 <div class="modal fade" id="updateModal{{ election.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModal{{ election.id }}Label" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -139,4 +145,7 @@
 </div>
 {% endfor %}
 
+
+
 {% endblock content %}
+

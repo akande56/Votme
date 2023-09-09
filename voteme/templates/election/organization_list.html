@@ -1,14 +1,20 @@
 {% extends "layoutss/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block content %}
+<style>
+    .r {
+    background-image: url({% static 'img/vr-bg.jpg' %}); /* Replace with your image file path */
+    background-size: cover; /* Adjust how the image covers the body */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-attachment: fixed; /* Keep the background fixed while scrolling */
+}
 
-<div class="">
+</style>
+<div class="r content">
     <div class="row pt-2">
-        <div class="col-md-8 ">
-            <div class="card card-plain card-dark offset-md-1">
-                <div class="card-header">
-                    <h1>Organization</h1>
-                </div>
+        <div class="col-md-8 offset-md-2">
+            <div class="card card-plain card-dark ">
 
                 <div class="card-body">
                     <br>
@@ -27,17 +33,22 @@
                             </form>
                         </div>
                     </div>
-                    <br>
-
-                    <!-- Organization List -->
-                    <ul class="list-group">
+                </div>
+            </div>
+            <!-- Organization List -->
+            <div class="card card-inline">
+                <div class="card-body">
+                    <div class="card-header">
+                        <h2>Organization with <span class="text-primary">membership</span> </h2>
+                    </div>
+                    <ul class="list-group-flush mt-3">
                         <li class="list-group-item ">
-                            <p class="text-black-50">Organization name || <span class="text-black-50">Address</span></p>
+                            <p class="text-danger">Organization</p>
                         </li>
-                        {% for organization in organizations %}
+                        {% for organization in organizations_with_membership %}
                         <li class="list-group-item text-black-50">
-                            <i class="tim-icons icon-bullet-list-67 bg-light"></i> {{ organization.name }} |
-                            {{organization.address}}
+                            <i class="tim-icons icon-bullet-list-67 bg-light"></i> {{ organization.name }}
+                            
                             <!-- Buttons for Detail, Update, and Delete -->
                             <div>
                                 <button type="button" class="btn btn-primary btn-sm ml-5" data-toggle="modal"
@@ -48,7 +59,7 @@
                                     data-target="#deleteModal{{ organization.id }}">Delete</button>
                             </div>
                         </li>
-
+        
                         <!-- Detail Modal -->
                         <div class="modal fade" id="detailModal{{ organization.id }}" tabindex="-1" role="dialog"
                             aria-labelledby="detailModal{{ organization.id }}Label" aria-hidden="true">
@@ -71,108 +82,159 @@
                                         <p>Membership Size: {{ organization.membership_size }}</p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </ul>
-
-                    <!-- Update Modal -->
-                    {% for organization in organizations %}
-                    <div class="modal fade" id="updateModal{{ organization.id }}" tabindex="-1" role="dialog"
-                        aria-labelledby="updateModal{{ organization.id }}Label" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="updateModal{{ organization.id }}Label">Update
-                                        Organization</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-
-                                    <form action="{% url 'update_organization' organization.id %}" method="post">
-                                        {% csrf_token %}
-                                        <div>
-                                            <label for="{{ form.name.id_for_label }}">Name:</label>
-                                            <input type="text" id="{{ form.name.id_for_label }}"
-                                                name="{{ form.name.name }}" value="{{ organization.name }}">
-                                        </div>
-                                        <div>
-                                            <label for="{{ form.industry.id_for_label }}">Industry:</label>
-                                            <input type="text" id="{{ form.industry.id_for_label }}"
-                                                name="{{ form.industry.name }}" value="{{ organization.industry }}">
-                                        </div>
-                                        <div>
-                                            <label for="{{ form.description.id_for_label }}">Description:</label>
-                                            <textarea id="{{ form.description.id_for_label }}"
-                                                name="{{ form.description.name }}">{{ organization.description }}</textarea>
-                                        </div>
-                                        <div>
-                                            <label for="{{ form.address.id_for_label }}">Address:</label>
-                                            <input type="text" id="{{ form.address.id_for_label }}"
-                                                name="{{ form.address.name }}" value="{{ organization.address }}">
-                                        </div>
-                                        <div>
-                                            <label for="{{ form.contact.id_for_label }}">Contact:</label>
-                                            <input type="text" id="{{ form.contact.id_for_label }}"
-                                                name="{{ form.contact.name }}" value="{{ organization.contact }}">
-                                        </div>
-                                        <div>
-                                            <label for="{{ form.membership_size.id_for_label }}">Membership
-                                                Size:</label>
-                                            <input type="number" id="{{ form.membership_size.id_for_label }}"
-                                                name="{{ form.membership_size.name }}"
-                                                value="{{ organization.membership_size }}">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Save</button>
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Cancel</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <!-- Delete Modal -->
-                    {% for organization in organizations %}
-                    <div class="modal fade" id="deleteModal{{ organization.id }}" tabindex="-1" role="dialog"
-                        aria-labelledby="deleteModal{{ organization.id }}Label" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModal{{ organization.id }}Label">Confirm Delete
-                                        Organization</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Are you sure you want to delete the organization "{{ organization.name }}"?</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <form action="{% url 'delete_organization' organization.id %}" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Cancel</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
                 </div>
-
             </div>
+            <div class="card card-inline">
+                <div class="card-header">
+                    <h2 class="text-primary">Signup for new Organization</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        
+                        <li class="list-group-item ">
+                            <p class="text-black-50">Organization name</p>
+                        </li>
+                        {% for organization in organizations_without_membership %}
+                        <li class="list-group-item text-black-50">
+                            <i class="tim-icons icon-bullet-list-67 bg-light"></i> {{ organization.name }}
+                            <!-- Buttons for Detail, Update, and Delete -->
+                            <div>
+                                <button type="button" class="btn btn-primary btn-sm ml-5" data-toggle="modal"
+                                    data-target="#detailModal{{ organization.id }}">Detail
+                                </button>
+                                <a class="btn btn-secondary" href="{% url 'join_organization' organization.pk %}">Join</a>
+                            </div>
+                        </li>
+        
+                        <!-- Detail Modal -->
+                        <div class="modal fade" id="detailModal{{ organization.id }}" tabindex="-1" role="dialog"
+                            aria-labelledby="detailModal{{ organization.id }}Label" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="detailModal{{ organization.id }}Label">Organization
+                                            Detail</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Display details of the organization here -->
+                                        <p>Name: {{ organization.name }}</p>
+                                        <p>Industry: {{ organization.industry }}</p>
+                                        <p>Description: {{ organization.description }}</p>
+                                        <p>Address: {{ organization.address }}</p>
+                                        <p>Contact: {{ organization.contact }}</p>
+                                        <p>Membership Size: {{ organization.membership_size }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Update Modal -->
+            {% for organization in organizations_with_membership %}
+            <div class="modal fade" id="updateModal{{ organization.id }}" tabindex="-1" role="dialog"
+                aria-labelledby="updateModal{{ organization.id }}Label" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updateModal{{ organization.id }}Label">Update
+                                Organization</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form action="{% url 'update_organization' organization.id %}" method="post">
+                                {% csrf_token %}
+                                <div>
+                                    <label for="{{ form.name.id_for_label }}">Name:</label>
+                                    <input type="text" id="{{ form.name.id_for_label }}" name="{{ form.name.name }}"
+                                        value="{{ organization.name }}">
+                                </div>
+                                <div>
+                                    <label for="{{ form.industry.id_for_label }}">Industry:</label>
+                                    <input type="text" id="{{ form.industry.id_for_label }}"
+                                        name="{{ form.industry.name }}" value="{{ organization.industry }}">
+                                </div>
+                                <div>
+                                    <label for="{{ form.description.id_for_label }}">Description:</label>
+                                    <textarea id="{{ form.description.id_for_label }}"
+                                        name="{{ form.description.name }}">{{ organization.description }}</textarea>
+                                </div>
+                                <div>
+                                    <label for="{{ form.address.id_for_label }}">Address:</label>
+                                    <input type="text" id="{{ form.address.id_for_label }}"
+                                        name="{{ form.address.name }}" value="{{ organization.address }}">
+                                </div>
+                                <div>
+                                    <label for="{{ form.contact.id_for_label }}">Contact:</label>
+                                    <input type="text" id="{{ form.contact.id_for_label }}"
+                                        name="{{ form.contact.name }}" value="{{ organization.contact }}">
+                                </div>
+                                <div>
+                                    <label for="{{ form.membership_size.id_for_label }}">Membership
+                                        Size:</label>
+                                    <input type="number" id="{{ form.membership_size.id_for_label }}"
+                                        name="{{ form.membership_size.name }}"
+                                        value="{{ organization.membership_size }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Delete Modal -->
+            {% for organization in organizations_with_membership %}
+            <div class="modal fade" id="deleteModal{{ organization.id }}" tabindex="-1" role="dialog"
+                aria-labelledby="deleteModal{{ organization.id }}Label" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModal{{ organization.id }}Label">Confirm Delete
+                                Organization</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete the organization "{{ organization.name }}"?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <form action="{% url 'delete_organization' organization.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+
         </div>
+        
     </div>
 </div>
-
-
 {% endblock content %}

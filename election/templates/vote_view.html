@@ -1,0 +1,50 @@
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+Cast Vote
+{% endblock title %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <h2>Make your choice now, by vote your favorite candidate</h2>
+        </div>
+        <div >
+            <a class="btn btn-danger mb-3" href="{% url 'election_results' election.id %}">View Election Result</a>
+
+        </div>
+        <div class="row">
+            {% for aspirant in aspirants %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-primary mb-0">Vote!</h3>
+                    </div>
+                    <div class="card-body offset-md-2">
+                        {% if aspirant.picture %}
+                        <img src="{{ aspirant.picture.url }}" alt="{{ aspirant.name }}" width="150"
+                            class="shadow-md-4 p-2">
+                        {% endif %}
+                        <h4 class="fs-5 mb-1 fw-bold">{{ aspirant.name }}</h4>
+                        <h6 class="fs-7">Running to Be: <span class="text-primary fw-bold">{{ aspirant.position }}</span></h6>
+                        <form method="post" action="{% url 'vote_view' election.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="position_id" value="{{ aspirant.position.id }}">
+                            <input type="hidden" name="aspirant_id" value="{{ aspirant.id }}">
+                            <button type="submit" class="btn btn-primary">Vote</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% if forloop.counter|divisibleby:3 and not forloop.last %}
+            </div>
+            <div class="row">
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

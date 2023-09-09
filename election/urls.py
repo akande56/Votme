@@ -6,6 +6,7 @@ urlpatterns = [
     path('load_units/', views.load_units, name='load_units'),
     path('organization/', views.organization_list, name='organization_list'),
     path('organization/create/', views.create_organization, name='create_organization'),
+    path('organization/join/<int:organization_id>', views.join_organization, name='join_organization'),
     path('organization/update/<int:organization_id>', views.update_organization, name='update_organization'),
     path('organization/delete/<int:organization_id>', views.delete_organization, name='delete_organization'),
     path('unit/list/', views.unit_list, name='unit'),
@@ -18,7 +19,9 @@ urlpatterns = [
     path('elections/update/<int:election_id>/', views.update_election, name='update_election'),
     path('elections/delete/<int:election_id>/', views.delete_election, name='delete_election'),
     path('elections/position/<int:election_id>/', views.position_list, name='position'),
+    path('election/<int:election_id>/vote/', views.vote_view, name='vote_view'),
     path('get_aspirant_details/', views.get_aspirant_details, name='get_aspirant_details'),
+    path('election/<int:election_id>/results/', views.election_results, name='election_results'),
 ]
 
     # path('detail/<int:organization_id>/', views.organization_detail, name='organization_detail'),

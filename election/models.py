@@ -83,7 +83,7 @@ class Election(models.Model):
         """Unicode representation of Election."""
         return str('{}{}'.format(self.organization, self.title))
 
-
+    
 
 class Position(models.Model):
     title = models.CharField(max_length=50)
