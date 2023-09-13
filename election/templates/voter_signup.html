@@ -1,0 +1,19 @@
+<!-- voter_signup.html -->
+
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+  Join Voter
+{% endblock title %}
+{% block content %}
+  <h1>Voter Registration for {{ election.title }} Election</h1>
+  <div class="col-md-5">
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+  </div>
+{% endblock %}

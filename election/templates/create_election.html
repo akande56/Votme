@@ -8,9 +8,9 @@ Election
 {% block content %}
 
 
-
+<h2 class="text-primary">Initiate New Election</h2>
 <div class="row">
-    <div class="col-md-6  pt-5">
+    <div class="col-md-6">
     
         <div class="card card-plainz">
             <div class="card-header">Election Form</div>
@@ -53,28 +53,28 @@ Election
                     <div class="form-group offset-md-1">
                         <div class="form-check-label">
                             <input type="checkbox" class="form-check-input" name="{{ form.aspirant_start.name }}" id="{{ form.aspirant_start.id_for_label }}" {% if election.aspirant_start %}checked{% endif %}>
-                            <label class="form-check-label  " for="{{ form.aspirant_start.id_for_label }}">Aspirant Start</label>
+                            <label class="form-check-label  " for="{{ form.aspirant_start.id_for_label }}">Allow Aspirant and Voters start registration</label>
                         </div>
                     </div>
 
                     <div class="form-group offset-md-1">
                         <div class="form-check-label">
                             <input type="checkbox" class="form-check-input" name="{{ form.approved_all_contestant.name }}" id="{{ form.approved_all_contestant.id_for_label }}" {% if election.approved_all_contestant %}checked{% endif %}>
-                            <label class="form-check-label" for="{{ form.approved_all_contestant.id_for_label }}">Approved All Contestant</label>
+                            <label class="form-check-label" for="{{ form.approved_all_contestant.id_for_label }}">Approved All Aspirant and Voters</label>
                         </div>
                     </div>
 
                     <div class="form-group offset-md-1">
                         <div class="form-check-label">
                             <input type="checkbox" class="form-check-input" name="{{ form.voting_start.name }}" id="{{ form.voting_start.id_for_label }}" {% if election.voting_start %}checked{% endif %}>
-                            <label class="form-check-label" for="{{ form.voting_start.id_for_label }}">Voting Start</label>
+                            <label class="form-check-label" for="{{ form.voting_start.id_for_label }}">Enable Voting</label>
                         </div>
                     </div>
 
                     <div class="form-group offset-md-1">
                         <div class="form-check-label">
                             <input type="checkbox" class="form-check-input" name="{{ form.voting_end.name }}" id="{{ form.voting_end.id_for_label }}" {% if election.voting_end %}checked{% endif %}>
-                            <label class="form-check-label" for="{{ form.voting_end.id_for_label }}">Voting End</label>
+                            <label class="form-check-label" for="{{ form.voting_end.id_for_label }}">End Vote</label>
                         </div>
                     </div>
                     <button class="btn btn-primary" type="submit">submit</button>
@@ -89,19 +89,25 @@ Election
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table tablesorter">
-                        <thead class="text-primary"><tr><th>Instruction</th></tr></thead>
+                        <thead class="text-primary"><tr><th>Instructions</th></tr></thead>
                         <tbody>
                             <tr>
-                                <td><p><span class="text-info">*</span> Startdate must come before Enddate</p></td>
+                                <td><p class="text-danger"><span class="text-primary">*</span> Note only Administrator for particular Organization can initiate new Election</p></td>
                             </tr>
                             <tr>
-                                <td><p><span class="text-info">**</span> Set aspirant_start; to enable aspirant vet for position, upload manifesto etc.</p></td>
+                                <td><p><span class="text-info">**</span> Startdate must come before Enddate</p></td>
                             </tr>
                             <tr>
-                                <td><p><span class="text-info">***</span> Set voting_start and voting_end to start and end election</p></td>
+                                <td><p><span class="text-info">***</span> Set Allow Aspirant and Voters to start registration; to enable aspirant vet for position, upload manifesto etc. And as well voters</p></td>
                             </tr>
                             <tr>
-                                <td><p><span class="text-info">****</span> Membership_size in organization determine number of peaple that can vote, this is to prevent <strong class="text-danger">Overvotting</strong> </p></td>
+                                <td><p> <span class="text-info">****</span> Approve both aspirant and voters to accredit them for particular Election</p></td>
+                            </tr>
+                            <tr>
+                                <td><p><span class="text-info">*****</span> Set Enable Voting to commence voting, and Vote end; to end voting</p></td>
+                            </tr>
+                            <tr>
+                                <td><p><span class="text-info">******</span> Membership_size in organization determine number of peaple that can join Election process, this is to prevent <strong class="text-danger">Overvotting</strong> </p></td>
                             </tr>
                         </tbody>
                     </table>

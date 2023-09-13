@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.db.models import Count
+from django.db import IntegrityError
 import json
 from .models import (
     Organization,
@@ -15,6 +16,7 @@ from .models import (
     Position,
     Aspirant,
     Vote,
+    Voter,
 )
 from .forms import (
     OrganizationForm,
@@ -22,10 +24,11 @@ from .forms import (
     ElectionFormStage1,
     ElectionUpdateForm,
     PositionForm,
-)
+    VoterRegistrationForm
+    )
+
 
 # Organization
-
 
 @login_required  # Requires the user to be logged in to access this view
 def organization_list(request):
@@ -44,7 +47,7 @@ def organization_list(request):
     # Get organizations where the user does not have a UserOrganization instance
     all_organizations = Organization.objects.all()
     organizations_without_membership = [org for org in all_organizations if org not in organizations_with_membership]
-
+        
     return render(request, 'election/organization_list.html', {'organizations_with_membership': organizations_with_membership, 'organizations_without_membership': organizations_without_membership, 'form': form})
 
 
@@ -64,12 +67,11 @@ def create_organization(request):
             # create default unit
             Unit_department.objects.create(title='all', organization=organization)
             messages.success(request, 'Organization created successfully!')
-            return redirect('unit')  # Redirect to the list view after successful creation
+            return redirect('create_election')  # Redirect to the list view after successful creation
     else:
         form = OrganizationForm()
 
     return render(request, 'election/organization_list.html', {'form': form})
-create_organization
 
 
 
@@ -78,7 +80,7 @@ def join_organization(request, organization_id):
     user = request.user
     organization = get_object_or_404(Organization, id = organization_id)
     UserOrganization.objects.create(member=user, organization = organization)
-    messages.success(request, 'You have successful join')
+    messages.success(request, f'You have successful join {organization.name}')
     
     return redirect('organization_list')
 
@@ -89,14 +91,15 @@ def update_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
 
     if organization.create_by != request.user:
-        messages.error(request, "You do not have permission to update this organization.")
-        messages.error(request, 'You need to be the one who added/created the organization..')
-        return redirect('home')  # Redirect to home with an error message
+        messages.error(request, f"You do not have permission to update this {organization.name}.")
+        messages.error(request, 'Adminstrator Identification required')
+        return redirect('organization_list')  # Redirect to home with an error message
 
     if request.method == 'POST':
         form = OrganizationForm(request.POST, instance=organization)
         if form.is_valid():
             form.save()
+            messages.success(request, f'{organization.name} updated successfully!')
             return redirect('organization_list')  # Redirect to the list view after successful update
     else:
         form = OrganizationForm(instance=organization)
@@ -109,11 +112,12 @@ def delete_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
 
     if organization.create_by != request.user:
-        messages.error(request, "You do not have permission to delete this organization.")
-        messages.error(request, 'You need to be the one who added/created the organization..')
+        messages.error(request, f"You do not have permission to delete {organization.name}")
+        messages.error(request, 'Administrator Identification required..')
         return redirect('organization_list')  # Redirect to home with an error message
 
     if request.method == 'POST':
+        messages.success(request, f'{organization.name} Deleted, all related date deleted as well')
         organization.delete()
         return redirect('organization_list')  # Redirect to the list view after successful deletion
 
@@ -150,7 +154,9 @@ def unit_list(request):
 
     form = Unit_departmentForm(request.POST)
 
-    user_organizations = Organization.objects.filter(userorganization__member=request.user)
+    # user_organizations = Organization.objects.filter(userorganization__member=request.user)
+    # changed to if user create organization instead
+    user_organizations = Organization.objects.filter(create_by=request.user)
     units = Unit_department.objects.filter(organization__in=user_organizations)
 
     return render(request, 'election/unit.html', {'units': units, 'form': form, 'user_organizations': user_organizations})
@@ -175,7 +181,7 @@ def create_unit(request):
                 unit = form.save()
                 unit.organization = organization
                 unit.save()
-                messages.success(request, "New unit/department added successfully....")
+                messages.success(request, f"New unit/department added for {organization.name} successfully....")
 
     else:
         form = Unit_departmentForm()
@@ -199,12 +205,14 @@ def update_unit(request, unit_id):
 
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to delete this unit.")
-        return redirect('home')
+        messages.info(request, 'Administrator Identification required')
+        return redirect('unit')
 
     if request.method == 'POST':
         form = Unit_departmentForm(request.POST, instance=unit)
         if form.is_valid():
             form.save()
+            messages.success(request, f"{unit.title} updated successfully")
             return redirect('unit')  # Redirect to the list view after successful update
     else:
         form = Unit_departmentForm(instance=unit)
@@ -218,7 +226,8 @@ def delete_unit(request, unit_id):
         organization = unit.organization
         if organization.create_by != request.user:
             messages.error(request, "You do not have permission to delete this unit.")
-            return redirect('home')
+            return redirect('unit')
+        messages.success(request, f"{unit.title} Deleted successfully")
         unit.delete()
         return redirect('unit')  # Redirect to the list view after successful deletion
 
@@ -236,9 +245,12 @@ def create_election(request):
         if form.is_valid():
             organization = form.cleaned_data['organization']  # Get selected organization
             if organization.create_by != request.user:
-                messages.error(request, "You do not have permission to create an election for this organization.")
+                messages.error(request, f"You do not have permission to create an election for {organization.name}")
+                messages.info(request, "Administrator Identification required")
                 return redirect('create_election')
-            messages.success(request, 'success; election created successfully')
+            messages.success(request, f'success!, new Election added for {organization.name}')
+            messages.info(request, 'if you did not include in the election to allow voters/aspirants to signup; you can do so by updating the election')
+            messages.info(request, 'Voters/Asprant need to signup and join your organization to be able to participate in the election process')
             form.save()
             return redirect('elections')
     else:
@@ -274,8 +286,10 @@ def delete_election(request, election_id):
     organization = election.organization
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to delete.")
+        messages.info(request, 'Administrative Identification required')
         return redirect('elections')
     election.delete()
+    messages.success(request, f"{election.title} Deleted successfully")
     messages.success(request, 'Election deleted successfully.')
     return redirect('elections')
 
@@ -287,13 +301,23 @@ def update_election(request, election_id):
     organization = election.organization
     if organization.create_by != request.user:
         messages.error(request, "You do not have permission to update.")
+        messages.info(request, 'Administrative Identification required')
         return redirect('elections')
 
     if request.method == 'POST':
         form = ElectionUpdateForm(request.POST, instance=election)
         if form.is_valid():
+            vote_s = form.cleaned_data['voting_start']
+            vote_e  = form.cleaned_data['voting_end']
+            appr_cont = form.cleaned_data['approved_all_contestant']
+            if (appr_cont==False) & (vote_s==True):
+                messages.error(request, "You cannot set voting_start without setting approval of all contestant/voters")
+                return redirect('elections')
+            if (vote_s==False) & (vote_e==True):
+                messages.error(request, "You cannot set voting_end without setting vote_start")
+                return redirect('elections')
             form.save()
-            messages.success(request, 'Election updated successfully')
+            messages.success(request, f'{election.title} updated successfully')
             return redirect('elections')
         else:
             print("Form is invalid:", form.errors)
@@ -332,7 +356,7 @@ def position_list(request, election_id):
             position = form.save(commit=False)
             position.election = election
             position.save()
-            messages.success(request, 'Success. New position added to election')
+            messages.success(request, f'Success. New position added to {Organization.name}')
             url = reverse('position', kwargs={'election_id': election_id})
             return redirect(url)
         else:
@@ -352,31 +376,38 @@ def aspirant_signup(request, election_id):
     except Election.DoesNotExist:
         return JsonResponse({"error": "Election not found"}, status=400)
 
-    if request.method == "POST":
-        # Handle individual aspirant signup for the selected position
-        position_id = request.POST.get("position")
-        position = Position.objects.get(id=position_id)
-        aspirant_name = request.POST.get("aspirant_name")
-        manifesto = request.POST.get("manifesto")
+    if election.aspirant_start:
+        if request.method == "POST":
+            try:
+                # Handle individual aspirant signup for the selected position
+                position_id = request.POST.get("position")
+                position = Position.objects.get(id=position_id)
+                aspirant_name = request.POST.get("aspirant_name")
+                manifesto = request.POST.get("manifesto")
 
-        # Save aspirant with associated user and election
-        aspirant = Aspirant.objects.create(
-            user=request.user,
-            election=election,
-            position=position,
-            name=aspirant_name,
-            manifesto=manifesto
-        )
+                # Save aspirant with associated user and election
+                aspirant = Aspirant.objects.create(
+                    user=request.user,
+                    election=election,
+                    position=position,
+                    name=aspirant_name,
+                    manifesto=manifesto
+                )
 
-        # Handle aspirant picture upload
-        picture = request.FILES.get("aspiransorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)t_picture")
-        if picture:
-            aspirant.picture = picture
-            aspirant.save()
-        else:
-            aspirant.save()
-        messages.success(request, "New aspirant registered successfully..")
-
+                # Handle aspirant picture upload
+                picture = request.FILES.get("aspirant_picture")
+                if picture:
+                    aspirant.picture = picture
+                    aspirant.save()
+                else:
+                    aspirant.save()
+                messages.success(request, "New aspirant registered successfully..")
+            except IntegrityError:
+                    # Handle the constraint violation by displaying an error message
+                    messages.error(request, "Constraint violation: You are already registered Aspirant for this Election.")
+    else:
+        messages.error(request, 'Sorry, Aspirant/Contestant Registration has yet to begin for this election. Contact organization administrator to update Election')
+        return redirect('elections')
     context = {
         "election": election,
         "positions": positions,
@@ -399,6 +430,7 @@ def get_aspirant_details(request):
             'manifesto': aspirant.manifesto,
             'photo_url': aspirant.picture.url if aspirant.picture else '',  # Assuming 'picture' is the ImageField
         }
+        
 
         return JsonResponse(aspirant_details)
     except Aspirant.DoesNotExist:
@@ -406,6 +438,108 @@ def get_aspirant_details(request):
 
 
 
+def admin_aspirant(request, election_id):
+    try:
+        election = Election.objects.get(id=election_id)
+        positions = Position.objects.filter(election=election)
+        aspirants = Aspirant.objects.filter(position__in=positions)
+        sorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)
+
+    except Election.DoesNotExist:
+        return JsonResponse({"error": "Election not found"}, status=400)
+    
+    context = {
+        "election": election,
+        "aspirants": sorted_aspirants,  
+    }
+    return render(request, "admin_aspirant.html", context)
+
+
+def approve_aspirants(request, election_id):
+    if request.method == 'POST':
+        election = get_object_or_404(Election, id=election_id)
+        organization = election.organization
+        print('shllll')
+        print(organization)
+        aspirant_ids = request.POST.getlist('aspirants_to_approve')
+
+        # Check if the request is coming from an authenticated admin user
+        if organization.create_by == request.user:
+            # Update the approval status for selected aspirants
+            Aspirant.objects.filter(id__in=aspirant_ids).update(approved=True)
+
+            # messages.success(request, f"{len(aspirant_ids)} aspirants have been approved.")
+            messages.success(request, "All selected aspirants have been approved.")
+        else:
+            messages.error(request, "You do not have permission to approve aspirants for this election.")
+    else:
+        messages.error(request, "Invalid request method.")
+
+    return redirect('admin_aspirant', election_id)  # Replace 'aspirants_list' with your aspirant list view URL name
+
+## voter
+def voter_signup(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
+
+    if election.aspirant_start:
+        if request.method == 'POST':
+            form = VoterRegistrationForm(request.POST)
+            if form.is_valid():
+                try:
+                    voter = form.save(commit=False)
+                    voter.election = election
+                    voter.user = request.user
+                    voter.save()
+                    messages.success(request, "Congrats, you have successfully signed up as a voter for this Election")
+                    return redirect('elections')
+                except IntegrityError:
+                    # Handle the constraint violation by displaying an error message
+                    messages.error(request, "Constraint violation: You are already registered as Voter for this Election.")
+        else:
+            form = VoterRegistrationForm()
+    else:
+        messages.error(request, 'Sorry, Voter Registration has yet to begin for this election. Contact organization administrator to update Election')
+        return redirect('elections')
+
+    return render(request, 'voter_signup.html', {'form': form, 'election': election})
+
+
+def admin_voter(request, election_id):
+    try:
+        voters = Voter.objects.filter(election_id=election_id)
+        election = get_object_or_404(Election, id=election_id)
+
+    except Voter.DoesNotExist:
+        messages.warning(request, 'There are no existing voters for this Election at the moment')
+        return redirect('admin_voter', election_id)
+    
+    context = {
+        "election": election,
+        "voters": voters,  
+    }
+    return render(request, "admin_voter.html", context)
+
+
+def approve_voters(request, election_id):
+    if request.method == 'POST':
+        election = get_object_or_404(Election, id=election_id)
+        organization = election.organization
+        
+        voter_ids = request.POST.getlist('voters_to_approve')
+
+        # Check if the request is coming from an authenticated admin user
+        if organization.create_by == request.user:
+            # Update the approval status for selected aspirants
+            Voter.objects.filter(id__in=voter_ids).update(approved=True)
+
+            # messages.success(request, f"{len(aspirant_ids)} aspirants have been approved.")
+            messages.success(request, "All selected voters have been approved.")
+        else:
+            messages.error(request, "You do not have permission to approve voters for this election.")
+    else:
+        messages.error(request, "Invalid request method.")
+
+    return redirect('admin_voter', election_id)  
 ## voting
 @login_required
 def vote_view(request, election_id):
@@ -415,23 +549,27 @@ def vote_view(request, election_id):
         return redirect('elections')  # Redirect to a suitable page if the election does not exist
 
     if request.method == 'POST':
-        # Handle the POST request for voting
-        user = request.user
-        position_id = request.POST.get('position_id')
-        aspirant_id = request.POST.get('aspirant_id')
+        if (election.voting_start==True) & (election.voting_end==False):
+            
+            # Handle the POST request for voting
+            user = request.user
+            position_id = request.POST.get('position_id')
+            aspirant_id = request.POST.get('aspirant_id')
 
-        # Check if the user has already voted for this position in the election
-        existing_vote = Vote.objects.filter(user=user, election=election, position_id=position_id).first()
+            # Check if the user has already voted for this position in the election
+            existing_vote = Vote.objects.filter(user=user, election=election, position_id=position_id).first()
 
-        if existing_vote:
-            # User has already voted for this position in the election
-            return JsonResponse({'message': 'You have already voted for this position in this election.'}, status=400)
-        else:
-            # Create a new vote record
-            vote = Vote(user=user, election=election, position_id=position_id, aspirant_id=aspirant_id)
-            vote.save()
-            return JsonResponse({'message': 'Vote recorded successfully.'}, status=200)
-
+            if existing_vote:
+                # User has already voted for this position in the election
+                return JsonResponse({'message': 'You have already voted for this position in this election.'}, status=400)
+            else:
+                # Create a new vote record
+                vote = Vote(user=user, election=election, position_id=position_id, aspirant_id=aspirant_id)
+                vote.save()
+                return JsonResponse({'message': 'Vote recorded successfully.'}, status=200)
+        if election.voting_start & election.voting_end:
+            return JsonResponse({'message': 'Election has already concluded.'}, status=400)
+        
     # Handle the GET request to display the aspirants for the election
     aspirants = Aspirant.objects.filter(election=election)
     sorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)

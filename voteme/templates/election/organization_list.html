@@ -17,13 +17,15 @@
             <div class="">
 
                 <div class="card-body">
-                    <br>
+                    <p class="text-info font-italic">** When you create new Organization you are identified as the <span class="text-danger">Adminstrator</span> for the Organization</p>
+                    <p class="text-info font-italic text-justify">** <span class="text-danger">Adminstrator</span> can control the flow of Election; approve <span class="text-danger">Voters</span> and <span class="text-danger">Contestant/Aspirant(s)</span> in Election etc..</p>
+                    <p class="text-info font-italic text-justify">** Navigate to ELECTION in sidebar and SELECT ELECTIONS for list of Election you can participate in </p>
                     <!-- Dropdown button for create -->
                     <div class="dropdown">
                         <button class="btn btn-primary bg-gradient-dark mb-0 dropdown-toggle" type="button"
                             id="createNewOrganizationDropdown" data-toggle="dropdown" aria-haspopup="true"
                             aria-expanded="false">
-                            Create New Organization
+                            Add New Organization
                         </button>
                         <div class="dropdown-menu" aria-labelledby="createNewOrganizationDropdown">
                             <form class="px-4 py-3" action="{% url 'create_organization' %}" method="post">
@@ -39,12 +41,11 @@
             <div class="card card-inline">
                 <div class="card-body">
                     <div class="card-header">
-                        <h2>Organization with <span class="text-primary">membership</span> </h2>
+                        <h2>Organizations with <span class="text-primary">Membership</span> </h2>
+                        <p class="text-danger font-italic">Administrator can update or delete organizations</p>
                     </div>
                     <ul class="list-group-flush mt-3">
-                        <li class="list-group-item ">
-                            <p class="text-danger">Organization</p>
-                        </li>
+                        
                         {% for organization in organizations_with_membership %}
                         <li class="list-group-item text-black-50">
                             <i class="tim-icons icon-bullet-list-67 bg-light"></i> {{ organization.name }}
@@ -53,10 +54,12 @@
                             <div>
                                 <button type="button" class="btn btn-primary btn-sm ml-5" data-toggle="modal"
                                     data-target="#detailModal{{ organization.id }}">Detail</button>
+                                {% if organization.create_by == request.user %}
                                 <button type="button" class="btn btn-info btn-sm ml-5" data-toggle="modal"
-                                    data-target="#updateModal{{ organization.id }}">Update</button>
-                                <button type="button" class="btn btn-danger btn-sm ml-5" data-toggle="modal"
-                                    data-target="#deleteModal{{ organization.id }}">Delete</button>
+                                data-target="#updateModal{{ organization.id }}">Update</button>
+                            <button type="button" class="btn btn-danger btn-sm ml-5" data-toggle="modal"
+                                data-target="#deleteModal{{ organization.id }}">Delete</button>
+                                {% endif %}
                             </div>
                         </li>
         
@@ -93,7 +96,8 @@
             </div>
             <div class="card card-inline">
                 <div class="card-header">
-                    <h2 class="text-primary">Signup for new Organization</h2>
+                    <h2 class="">Join Organization</h2>
+                    <p class="text-danger font-italic">When you join an organization you can participate as aspirant or voter in hosted elections initiated by the organization</p>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
@@ -115,7 +119,8 @@
         
                         <!-- Detail Modal -->
                         <div class="modal fade" id="detailModal{{ organization.id }}" tabindex="-1" role="dialog"
-                            aria-labelledby="detailModal{{ organization.id }}Label" aria-hidden="true">
+                            aria-labelledby="detailModal{{ organizatio-md-12">
+                            <h2 class="text-primary">Approve Aspirant and Vn.id }}Label" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">

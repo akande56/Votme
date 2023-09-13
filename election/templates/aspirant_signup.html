@@ -58,13 +58,14 @@ Aspirant
                     <div class="row">
                         <div class="col-md-5">
                             <h2 class="h1 badge-primary">Aspirants</h2>
+                            <p class="text-danger font-italic mb-4 h3"> <span class="">Click aspirants name to display Aspirant's portofolio</span> </p>
                             <ul class="list-group list-group-flush" id="aspirants-list">
                                 {% for aspirant in aspirants %}
                                 <li class="list-inline-item text-black-50 mt-3" data-aspirant-id="{{ aspirant.id }}">
-                                    <p class="d-inline-block">for post: {{aspirant.position}}</p>
                                     <a href="#" class="aspirant-link" data-aspirant-id="{{ aspirant.id }}">
                                         {{aspirant.name}}
                                     </a>
+                                    <p class="d-inline-block">for post: {{aspirant.position}}</p>
                                 </li>
                                 {% endfor %}
                                 <!-- This will be dynamically updated by JavaScript -->
@@ -150,7 +151,6 @@ Aspirant
     console.log(aspirantLinks)
     aspirantLinks.forEach(link => {
         link.addEventListener("click", function (event) {
-            console.log('ssssssssssssffffffff')
             event.preventDefault(); // Prevent the default link behavior
             const selectedAspirantId = link.getAttribute("data-aspirant-id");
             
@@ -174,14 +174,15 @@ Aspirant
                                 <img src="${data.photo_url}" alt="${data.name}'s Photo" width="200">
                                 <h3>${data.name}</h3>
                             </div>
-                            <p>Position: ${data.position}</p>
-                            <p>Manifesto: ${data.manifesto}</p>
+                            <p class="offset-2>Position: ${data.position}</p>
+                            <p class="offset-2 text-justify">Manifesto: ${data.manifesto}</p>
                         `;
                         
                         // Display the aspirant details
                         detailsColumn.innerHTML = detailsHTML;
                     } else {
                         console.error("Error fetching aspirant details. Status: " + xhr.status);
+                        alert
                     }
                 }
             };

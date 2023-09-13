@@ -22,20 +22,27 @@
                 <p>Department: {{ election.department }}</p>
                 <p>Start Date: {{ election.start_date }}</p>
                 <p>End Date: {{ election.end_date }}</p>
-                <p>Aspirant Start: {% if election.aspirant_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
-                <p>Approved All Contestant: {% if election.approved_all_contestant %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
-                <p>Voting Start: {% if election.voting_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
-                <p>Voting End: {% if election.voting_end %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Aspirant/Voter Registration: {% if election.aspirant_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Approved All Aspirants & Voters: {% if election.approved_all_contestant %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>Start Voting: {% if election.voting_start %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+                <p>End Voting: {% if election.voting_end %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
                 <!-- Add more information as needed -->
                 <div class="card-footer">
+                    {% if election.organization.create_by == request.user %}
                     <a href="#" class="btn btn-info" data-toggle="modal" data-target="#updateModal{{ election.id }}">
                         <i class="tim-icons icon-pencil"></i>
                     </a>
                     <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">
                         <i class="tim-icons icon-trash-simple"></i>
                     </a>
-                    <a href="{% url 'position' election.id  %}" class="btn btn-primary">Post(office)</a>
-                    <a  class="btn btn-secondary" href=" {% url 'aspirant_signup' election.id %} ">Aspirant</a>
+                    <a href="{% url 'position' election.id  %}" class="btn btn-primary">Add Position(office)</a>  
+                    <a  class="btn btn-warning btn-sm" href=" {% url 'admin_aspirant' election.id %} ">Approve Aspirants</a>
+                    <a  class="btn btn-warning btn-sm" href=" {% url 'admin_voter' election.id %} ">Approve Voters</a>
+                    {% endif %}
+                    
+                    <hr class="bg-primary">
+                    <a  class="btn btn-secondary" href=" {% url 'aspirant_signup' election.id %} ">Join as Aspirant</a>
+                    <a  class="btn btn-secondary" href=" {% url 'voter_signup' election.id %} ">Join as Voter</a>
                     <a class="btn btn-warning" href=" {% url 'vote_view' election.id %} ">Vote</a>
 
                 </div>

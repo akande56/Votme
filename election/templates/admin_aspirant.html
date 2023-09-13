@@ -1,0 +1,114 @@
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+Approve Aspirants
+{% endblock title %}
+
+{% block content %}
+<div class="content">
+    <div class="col-md-12">
+        <h2 class="text-primary">Approve Aspirant for {{ election.title }} Election</h2>
+    </div>
+</div>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-inline">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <h2 class="h1 badge-primary">Aspirants</h2>
+                            <p class="text-danger font-italic mb-4 h3">
+                                <span class="">Click aspirants name to display Aspirant's portfolio</span>
+                            </p>
+
+                            <!-- Add the form for approving aspirants here -->
+                            <form method="post" action="{% url 'approve_aspirants' election.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary mb-3">Approve Selected Aspirants</button>
+
+                                <ul class="list-group list-group-flush" id="aspirants-list">
+                                    {% for aspirant in aspirants %}
+                                    <li class="list-inline-item text-black-50 mt-3" data-aspirant-id="{{ aspirant.id }}">
+                                        <input type="checkbox" name="aspirants_to_approve" value="{{ aspirant.id }}">
+                                        <a href="#" class="aspirant-link" data-aspirant-id="{{ aspirant.id }}">
+                                            {{ aspirant.name }}
+                                        </a>
+                                        <p class="d-inline-block">for post: {{ aspirant.position }}</p>
+                                        
+                                        {% if aspirant.approved %}
+                                            <p class="badge badge-warning d-inline-block">Approved</p>       
+                                        {% endif %}
+                                            
+                                    </li>
+                                    {% endfor %}
+                                    <!-- This will be dynamically updated by JavaScript -->
+                                </ul>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Details Column -->
+                            <p class="text-primary h3 badge-secondary">Aspirant Portfolio</p>
+                            <div id="aspirant-details">
+                                <!-- Details of the selected aspirant will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // JavaScript code for handling aspirant details display
+    const aspirantLinks = document.querySelectorAll(".aspirant-link");
+    const detailsColumn = document.getElementById("aspirant-details");
+
+    aspirantLinks.forEach(link => {
+        link.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent the default link behavior
+            const selectedAspirantId = link.getAttribute("data-aspirant-id");
+
+            // Create an XMLHttpRequest object
+            const xhr = new XMLHttpRequest();
+
+            // Define the URL for fetching aspirant details
+            const url = "{% url 'get_aspirant_details' %}?aspirant_id=" + selectedAspirantId;
+
+            xhr.open("GET", url, true);
+
+            // Set up the callback function to handle the response
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+
+                        // Create an HTML template for displaying aspirant details
+                        const detailsHTML = `
+                            <div class="text-center">
+                                <img src="${data.photo_url}" alt="${data.name}'s Photo" width="200">
+                                <h3>${data.name}</h3>
+                            </div>
+                            <p class="offset-2">Position: ${data.position}</p>
+                            <p class="offset-2 text-justify">Manifesto: ${data.manifesto}</p>
+                        `;
+
+                        // Display the aspirant details
+                        detailsColumn.innerHTML = detailsHTML;
+                    } else {
+                        console.error("Error fetching aspirant details. Status: " + xhr.status);
+                    }
+                }
+            };
+
+            // Send the request
+            xhr.send();
+        });
+    });
+</script>
+{% endblock javascripts %}

@@ -1,0 +1,56 @@
+{% extends "layoutss/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+Approve Voters
+{% endblock title %}
+
+{% block content %}
+<div class="content">
+    <div class="col-md-12">
+        <h2 class="text-primary">Approve Voters for {{ election.title }} Election</h2>
+    </div>
+</div>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-inline">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <h2 class="h1">Voters</h2>
+                            
+
+                            <!-- Add the form for approving aspirants here -->
+                            <form method="post" action="{% url 'approve_voters' election.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary mb-3">Approve Selected Voters</button>
+
+                                <ul class="list-group list-group-flush" id="aspirants-list">
+                                    {% for voter in voters %}
+                                    <li class="list-inline-item text-black-50 mt-3" data-aspirant-id="{{ voter.id }}">
+                                        <input type="checkbox" name="voters_to_approve" value="{{ voter.id }}">
+                                        
+                                        <p class="d-inline-block"> {{ aspirant.election_id }}| {{voter.user.email}}</p>
+                                        
+                                        {% if voter.approved %}
+                                            <p class="badge badge-warning d-inline-block">Approved</p>       
+                                        {% endif %}
+                                            
+                                    </li>
+                                    {% endfor %}
+                                    <!-- This will be dynamically updated by JavaScript -->
+                                </ul>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                                                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

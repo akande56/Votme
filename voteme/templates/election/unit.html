@@ -10,11 +10,19 @@
     background-attachment: fixed; /* Keep the background fixed while scrolling */
 }
 </style>
+<p class="text-danger font-italic">Currently application does not support unit voting, future version will cover this</p>
+{% if units %}
+{% else %}
+<p class="text-danger">You do not have administrative access to any Organization</p>
+{% endif %}
+    
 <div class="r content" style="height: inherit;">
     <div class="container">
         <div class="row">
             <div class="col-md-8 offset-md-2 pt-2">
                 <div class="">
+                    
+                    {% if units %}
                     <div><h1 class="text-secondary h1 mt-4">Unit/Department</h1></div>
                     <div class="">
                         
@@ -152,6 +160,8 @@
                         
                         
                     </div>
+                    {% endif %}
+                        
                 </div>
             </div>
         </div>

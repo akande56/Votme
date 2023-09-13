@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Organization, Unit_department,UserOrganization, Election, Position
+from .models import Organization, Unit_department,UserOrganization, Election, Position, Voter
 
 
 class OrganizationForm(forms.ModelForm):
@@ -52,3 +52,8 @@ class PositionForm(forms.ModelForm):
 
         model = Position
         exclude = ['election']
+
+class VoterRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = Voter
+        fields = ['organization_id']

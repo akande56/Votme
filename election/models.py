@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from voteme.users.models import User
 
 class Organization(models.Model):
@@ -49,7 +50,7 @@ class Unit_department(models.Model):
 class UserOrganization(models.Model):
     """Model definition for UserOrganization."""
     member = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    organization  = models.ForeignKey(to=Organization,null=True ,on_delete=models.SET_NULL)
+    organization  = models.ForeignKey(to=Organization,null=True ,on_delete=models.CASCADE)
     class Meta:
         """Meta definition for UserOrganization."""
 
@@ -64,8 +65,8 @@ class UserOrganization(models.Model):
 class Election(models.Model):
     """Model definition for Election."""
     title = models.CharField(max_length=50, blank=True)
-    organization = models.ForeignKey(to=Organization, null=True ,on_delete=models.SET_NULL, related_name='ElectionOrganization')
-    department = models.ForeignKey(to=Unit_department, null=True ,on_delete=models.SET_NULL, related_name='ElectionDepartment')
+    organization = models.ForeignKey(to=Organization, null=True ,on_delete=models.CASCADE, related_name='ElectionOrganization')
+    department = models.ForeignKey(to=Unit_department, null=True ,on_delete=models.CASCADE, related_name='ElectionDepartment')
     start_date = models.DateField(blank=True)
     end_date = models.DateField(blank=True)
     aspirant_start = models.BooleanField(default=False)
@@ -103,9 +104,28 @@ class Aspirant(models.Model):
     withdrawn = models.BooleanField(default=False)
     picture = models.ImageField(upload_to='aspirant_pictures/', null=True, blank=True)
     manifesto = models.TextField()
-    
+    registered_at = models.DateTimeField(default=timezone.now)
+    approved = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.user} - {self.position} ({self.election})"
+    
+    class Meta:
+        unique_together = ('user', 'election')
+        
+
+
+class Voter(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    election = models.ForeignKey('Election', on_delete=models.CASCADE)
+    organization_id = models.CharField( max_length=15)
+    registered_at = models.DateTimeField(default=timezone.now)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.email
+    class Meta:
+        unique_together = ('user', 'election', 'organization_id')
 
 
 class Vote(models.Model):
