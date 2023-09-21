@@ -142,3 +142,4 @@ CLOUDINARY_STORAGE = {
      'API_KEY': env("API_KEY"),
      'API_SECRET': env("API_SECRET"),	
 }
+CLOUDINARY_URL=cloudinary://992973971536571:J-xnz-aS9-qo0gUcUa2in45r8E4@votemepicstr
