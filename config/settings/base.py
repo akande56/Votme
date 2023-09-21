@@ -292,8 +292,7 @@ SOCIALACCOUNT_FORMS = {"signup": "voteme.users.forms.UserSocialSignupForm"}
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'votemepicstr',
-     'API_KEY': '992973971536571',
-     'API_SECRET': 'J-xnz-aS9-qo0gUcUa2in45r8E4',	
+    'CLOUD_NAME': env("CLOUD_NAME"),
+     'API_KEY': env("API_KEY"),
+     'API_SECRET': env("API_SECRET"),	
 }
-CLOUDINARY_URL='cloudinary://992973971536571:J-xnz-aS9-qo0gUcUa2in45r8E4@votemepicstr'
