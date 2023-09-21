@@ -2,3 +2,6 @@
 # ------------------------------------------------------------------------------
 USE_DOCKER=yes
 IPYTHONDIR=/app/.ipython
+CLUDINARY_API= 992973971536571	
+API_SECRET= J-xnz-aS9-qo0gUcUa2in45r8E4
+CLOUD_NAME= votemepicstr
