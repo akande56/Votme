@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Election Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Election Results</h1>
+
+    {% for result in results %}
+    <h2>{{ result.position.title }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Aspirant</th>
+                <th>Position</th>
+                <th>Vote Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aspirant_vote in result.aspirant_votes %}
+            <tr>
+                <td>{{ aspirant_vote.aspirant.name }}</td>
+                <td>{{ aspirant_vote.aspirant.position.title }}</td>
+                <td>{{ aspirant_vote.vote_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</body>
+</html>

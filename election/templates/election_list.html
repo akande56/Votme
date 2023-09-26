@@ -29,21 +29,33 @@
                 <!-- Add more information as needed -->
                 <div class="card-footer">
                     {% if election.organization.create_by == request.user %}
-                    <a href="#" class="btn btn-info" data-toggle="modal" data-target="#updateModal{{ election.id }}">
-                        <i class="tim-icons icon-pencil"></i>
+                    <!-- Button to toggle the collapse -->
+                    <a href="#collapseButtons{{ election.id }}" class="btn btn-success" data-toggle="collapse">
+                        Manage
                     </a>
-                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">
-                        <i class="tim-icons icon-trash-simple"></i>
-                    </a>
-                    <a href="{% url 'position' election.id  %}" class="btn btn-primary">Add Position(office)</a>  
-                    <a  class="btn btn-warning btn-sm" href=" {% url 'admin_aspirant' election.id %} ">Approve Aspirants</a>
-                    <a  class="btn btn-warning btn-sm" href=" {% url 'admin_voter' election.id %} ">Approve Voters</a>
+                   
+                    <div class="collapse" id="collapseButtons{{ election.id }}">
+                        <a href="#" class="btn btn-info" data-toggle="modal" data-target="#updateModal{{ election.id }}">
+                            <i class="tim-icons icon-pencil"></i>
+                        </a>
+                        <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ election.id }}">
+                            <i class="tim-icons icon-trash-simple"></i>
+                        </a>
+                        <a href="{% url 'position' election.id  %}" class="btn btn-primary">Add Position(office)</a>
+                        <a class="btn btn-secondary btn-sm" href="{% url 'admin_aspirant' election.id %}">Approve Aspirants</a>
+                        <a class="btn btn-secondary btn-sm" href="{% url 'admin_voter' election.id %}">Approve Voters</a>
+                            <a href="{% url 'generate_pdf' election.id %}" class="btn btn-primary">Download Result</a>
+                       
+                    </div>
+                    
+                    
                     {% endif %}
                     
                     <hr class="bg-primary">
                     <a  class="btn btn-secondary" href=" {% url 'aspirant_signup' election.id %} ">Join as Aspirant</a>
                     <a  class="btn btn-secondary" href=" {% url 'voter_signup' election.id %} ">Join as Voter</a>
                     <a class="btn btn-warning" href=" {% url 'vote_view' election.id %} ">Vote</a>
+                    <a class="btn btn-primary " href="{% url 'election_results' election.id %}">Result</a>
 
                 </div>
                 <div class="modal fade" id="updateModal{{ election.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModal{{ election.id }}Label" aria-hidden="true">

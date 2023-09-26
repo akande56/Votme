@@ -27,6 +27,7 @@ urlpatterns = [
     path('approve_voters/<int:election_id>', views.approve_voters, name='approve_voters'),
     path('get_aspirant_details/', views.get_aspirant_details, name='get_aspirant_details'),
     path('elections/election/vote/<int:election_id>/results/', views.election_results, name='election_results'),
+    path('elections/election/vote/result/pdf/<int:election_id>', views.generate_pdf, name='generate_pdf')
 ]
 
     # path('detail/<int:organization_id>/', views.organization_detail, name='organization_detail'),

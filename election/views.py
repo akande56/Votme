@@ -4,10 +4,13 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from django.db.models import Count
 from django.db import IntegrityError
+from django.template.loader import get_template
 import json
+from weasyprint import HTML
+
 from .models import (
     Organization,
     UserOrganization,
@@ -555,23 +558,31 @@ def vote_view(request, election_id):
             user = request.user
             position_id = request.POST.get('position_id')
             aspirant_id = request.POST.get('aspirant_id')
-
-            # Check if the user has already voted for this position in the election
-            existing_vote = Vote.objects.filter(user=user, election=election, position_id=position_id).first()
-
-            if existing_vote:
-                # User has already voted for this position in the election
-                return JsonResponse({'message': 'You have already voted for this position in this election.'}, status=400)
+            # check if user is registered as a voter 
+            try:
+                voter = Voter.objects.get(election = election, user = user)
+            except Voter.DoesNotExist:
+                messages.error(request, "You are not currently not registerd as a voter for this election, please do so.")
             else:
-                # Create a new vote record
-                vote = Vote(user=user, election=election, position_id=position_id, aspirant_id=aspirant_id)
-                vote.save()
-                return JsonResponse({'message': 'Vote recorded successfully.'}, status=200)
+                # check if user has voted before
+                try:
+                    Vote.objects.get(voter=voter, election=election, position_id=position_id)
+                except Vote.DoesNotExist:
+                        if voter.approved:
+                            vote = Vote(voter = voter, election=election, position_id=position_id, aspirant_id=aspirant_id)
+                            vote.save()
+                            messages.success(request, 'Vote recorded successfully.')
+                        else:
+                            messages.error(request, "Sorry you are yet to be approved as a voter for this election, contact election administrator")
+                else:
+                    messages.error(request, "You have already casted vote for this 'position' in this election")
+                    
         if election.voting_start & election.voting_end:
-            return JsonResponse({'message': 'Election has already concluded.'}, status=400)
+            messages.error(request, 'Election has already concluded.')
+            # return JsonResponse({'message': 'Election has already concluded.'}, status=400)
         
     # Handle the GET request to display the aspirants for the election
-    aspirants = Aspirant.objects.filter(election=election)
+    aspirants = Aspirant.objects.filter(election=election, approved=True)
     sorted_aspirants = sorted(aspirants, key=lambda aspirant: aspirant.position.title)
 
     return render(request, 'vote_view.html', {'election': election, 'aspirants': sorted_aspirants})
@@ -603,5 +614,52 @@ def election_results(request, election_id):
             'position': position,
             'aspirant_votes': aspirant_votes,
         })
-        print(results)
+        
     return render(request, 'election/election_results.html', {'election': election, 'results': results})
+
+
+def generate_pdf(request, election_id):
+    try:
+        # Get the election object
+        election = get_object_or_404(Election, id=election_id)
+        
+        # Get positions for the specific election
+        positions = Position.objects.filter(election=election)
+
+        # Now, you can fetch results for each position and each aspirant
+        results = []
+        for position in positions:
+            # Fetch all aspirants for this position in the specific election
+            aspirants = Aspirant.objects.filter(position=position, election=election)
+
+            # Calculate the number of votes for each aspirant in this position
+            aspirant_votes = []
+            for aspirant in aspirants:
+                vote_count = Vote.objects.filter(position=position, aspirant=aspirant).count()
+                aspirant_votes.append({
+                    'aspirant': aspirant,
+                    'vote_count': vote_count,
+                })
+
+            results.append({
+                'position': position,
+                'aspirant_votes': aspirant_votes,
+            })
+        
+        # Render the result data in your template
+        template = get_template('election/election_results_pdf.html')
+        html_content = template.render({'results': results, 'ok': True})
+
+        # Generate a PDF using WeasyPrint
+        pdf = HTML(string=html_content).write_pdf()
+
+        # Create an HttpResponse with the PDF content
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="election_results.pdf"'
+        
+        return response
+
+    except Exception as e:
+        # Log the exception or handle it gracefully
+        print(f"Error generating PDF: {str(e)}")
+        return HttpResponseServerError("Error generating PDF")

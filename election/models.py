@@ -129,14 +129,14 @@ class Voter(models.Model):
 
 
 class Vote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    voter = models.ForeignKey (Voter, on_delete=models.CASCADE)
     election = models.ForeignKey(Election, on_delete=models.CASCADE)
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
     aspirant = models.ForeignKey(Aspirant, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('user', 'position', 'election')  # To ensure a user can only vote once per position in an election
+        unique_together = ('voter', 'position', 'election')  # To ensure a user can only vote once per position in an election
 
     def __str__(self):
-        return f"Vote by {self.user} for {self.position} in {self.election}"
+        return f"Vote by {self.voter.usery} for {self.position} in {self.election}"
 
