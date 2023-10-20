@@ -9,7 +9,8 @@ from django.db.models import Count
 from django.db import IntegrityError
 from django.template.loader import get_template
 import json
-from weasyprint import HTML
+from xhtml2pdf import pisa
+# from weasyprint import HTML
 
 from .models import (
     Organization,
@@ -617,12 +618,11 @@ def election_results(request, election_id):
         
     return render(request, 'election/election_results.html', {'election': election, 'results': results})
 
-
 def generate_pdf(request, election_id):
     try:
         # Get the election object
         election = get_object_or_404(Election, id=election_id)
-        
+
         # Get positions for the specific election
         positions = Position.objects.filter(election=election)
 
@@ -645,19 +645,27 @@ def generate_pdf(request, election_id):
                 'position': position,
                 'aspirant_votes': aspirant_votes,
             })
-        
+
         # Render the result data in your template
         template = get_template('election/election_results_pdf.html')
-        html_content = template.render({'results': results, 'ok': True})
+        context = {'results': results, 'ok': True}
+        html_content = template.render(context)
 
-        # Generate a PDF using WeasyPrint
-        pdf = HTML(string=html_content).write_pdf()
+        # Create a PDF response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="election_results.pdf"'
 
-        # Create an HttpResponse with the PDF content
-        response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="election_results.pdf"'
-        
-        return response
+        # Generate the PDF using pisa
+        pisa_status = pisa.CreatePDF(
+            html_content,  # HTML content
+            dest=response,  # File-like object to receive PDF data
+        )
+
+        if not pisa_status.err:
+            return response
+        else:
+            # Handle the PDF generation error
+            return HttpResponse("Error generating PDF", status=500)
 
     except Exception as e:
         # Log the exception or handle it gracefully
