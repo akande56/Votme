@@ -7,7 +7,7 @@
 {% block content %}
 <style>
     .pt-1 {
-    background-image: url({% static 'img/home-decor-3.jpg' %}); /* Replace with your image file path */
+    background-image: url({% static '' %}); /* Replace with your image file path */
     background-size: cover; /* Adjust how the image covers the body */
     background-repeat: no-repeat; /* Prevent the image from repeating */
     background-attachment: fixed; /* Keep the background fixed while scrolling */
@@ -52,7 +52,7 @@
                     <div class="table mt-0">
                         <table class="table tablesorter">
                             <thead>
-                                <tr><th style="color: rgb(221, 228, 21);">Title</th><th style="color: rgb(221, 228, 21);">Department</th></tr>
+                                <tr><th >Title</th><th>Department</th></tr>
                             </thead>
                             <tbody>
                                 {% for position in positions %}

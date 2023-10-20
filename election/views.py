@@ -562,7 +562,7 @@ def vote_view(request, election_id):
             try:
                 voter = Voter.objects.get(election = election, user = user)
             except Voter.DoesNotExist:
-                messages.error(request, "You are not currently not registerd as a voter for this election, please do so.")
+                messages.error(request, "You are currently not registerd as a voter for this election, please do so.")
             else:
                 # check if user has voted before
                 try:
@@ -573,7 +573,7 @@ def vote_view(request, election_id):
                             vote.save()
                             messages.success(request, 'Vote recorded successfully.')
                         else:
-                            messages.error(request, "Sorry you are yet to be approved as a voter for this election, contact election administrator")
+                            messages.error(request, "Sorry, you are yet to be approved as a voter for this election, contact election administrator")
                 else:
                     messages.error(request, "You have already casted vote for this 'position' in this election")
                     
@@ -601,9 +601,9 @@ def election_results(request, election_id):
         # Fetch all aspirants for this position in the specific election
         aspirants = Aspirant.objects.filter(position=position, election=election)
 
-        # Calculate the number of votes for each aspirant in this position
         aspirant_votes = []
         for aspirant in aspirants:
+        # Calculate the number of votes for each aspirant in this position
             vote_count = Vote.objects.filter(position=position, aspirant=aspirant).count()
             aspirant_votes.append({
                 'aspirant': aspirant,
