@@ -138,5 +138,5 @@ class Vote(models.Model):
         unique_together = ('voter', 'position', 'election')  # To ensure a user can only vote once per position in an election
 
     def __str__(self):
-        return f"Vote by {self.voter.usery} for {self.position} in {self.election}"
+        return f"Vote by {self.voter.user} for {self.position} in {self.election}"
 
